@@ -1,5 +1,4 @@
 import os
-import json
 os.environ['DJANGO_SETTINGS_MODULE'] = 'nxos_aci.settings'
 
 
@@ -18,6 +17,9 @@ def create_vlans_from_nxos(file,  cmd_string="vlan "):
     epgs_bds = {}
     vrf_lst = []
     for line in config_file:
+        if line.startswith("hostname "):
+            tmp_hostname = line.split("hostname ")
+            hostname = tmp_hostname[1].strip()
         if line.startswith(cmd_string) and len(line) < 11:
             prev_line = line
             temp_line = line.split(" ")
@@ -27,7 +29,8 @@ def create_vlans_from_nxos(file,  cmd_string="vlan "):
             vlan_name_lst = line.split("  name")
             vlan_name = vlan_name_lst[1].strip()
             epgs_bds[vlan_id]= {
-                "name": vlan_name}
+                "name": vlan_name,
+                "hostname": hostname}
         elif line.startswith("interface Vlan"):
             subnet_lst = line.split('interface Vlan')
             svi_cleaned = subnet_lst[1].strip()
@@ -46,54 +49,41 @@ def create_vlans_from_nxos(file,  cmd_string="vlan "):
             epgs_bds[svi_cleaned]["ip"] = ip_lst[1].strip()
     return epgs_bds
 
+
+def import_nxos_to_django(input_dict):
+    for keys, values in input_dict.items():
+        vlan_entry = Nxos_vlan_svi(
+            encap=keys,
+            name=values.get("name").upper(),
+            svi_ip=values.get("ip", "DEFAULT"),
+            vrf=values.get("vrf", "DEFAULT").upper(),
+            hostname=values.get("hostname", "DEFAULT").upper()
+        )
+        vlan_entry.save()
+
+
+def convert_vlans_to_epgs():
+    for vlan in Nxos_vlan_svi.objects.all():
+        print("vlan: {} name: {}".format(vlan.encap, vlan.name))
+        epg = FvAEPg(
+            apic_addr='192.168.0.1',
+            pcEnfPref='unenforced',
+            dn='uni/tn-NXOS-ACI-DEFAULT/ap-{}-LEGACY-{}_AP/epg-{}-{}_EPG'.format(vlan.vrf, vlan.hostname, vlan.encap,
+                                                                                 vlan.name),
+            name='{}-{}_EPG'.format(vlan.encap, vlan.name),
+            tenant='NXOS-ACI-DEFAULT',
+            bd_tDn ='uni/tn-NXOS-ACI-DEFAULT/BD-{}-{}_BD'.format(vlan.encap, vlan.name),
+            fvRsDomAtt_tDn='uni/phys-LEGACY_PHY',
+            fvRsPathAtt='topology/pod-1/protpaths-101-102/pathep-[IPG-LEGACY-{}_IPG]'.format(vlan.hostname),
+            encap=vlan.encap,
+            legacy_switch=vlan.hostname,
+            vrf=vlan.vrf
+        )
+        epg.save()
+
 config_file = read_nxos_config_file()
 epgs_bds = create_vlans_from_nxos(config_file)
-for keys, values in epgs_bds.items():
-    vlan_entry = Nxos_vlan_svi(
-        encap=keys,
-        name=values.get("name"),
-        svi_ip=values.get("ip", "DEFAULT"),
-        vrf=values.get("vrf", "DEFAULT")
-    )
-    print("encap: {} name: {}, ip {}, vrf {} ".format(keys, values.get("name"), values.get("ip"), values.get("vrf")))
-    vlan_entry.save()
-'''
-for keys, values in epgs_bds.items():
-    try:
-        print("found")
-        print(keys)
-        fvBD_entry = FvBD(apic_addr="192.168.0.1",
-                          descr=epgs_bds[keys]["name"],
-                          dn="uni/tn-LEGACY_DEFAULT/BD-{}".format(epgs_bds[keys]["name"]),
-                          arpFlood="yes",
-                          epMoveDetectMode="",
-                          ipLearning="no",
-                          limitIpLearnToSubnets="yes",
-                          name=epgs_bds[keys]["name"],
-                          unicastRoute="yes",
-                          unkMacUcastAct="flood",
-                          unkMcastAct="flood",
-                          fvSubnet1=epgs_bds[keys]["ip"],
-                          fvSubnet1_scope="public",
-                          fvRsCtx=epgs_bds[keys]["vrf"]
-                        )
-    except KeyError:
-        fvBD_entry = FvBD(apic_addr="192.168.0.1",
-                          descr=epgs_bds[keys]["name"],
-                          dn="uni/tn-LEGACY_DEFAULT/BD-{}".format(epgs_bds[keys]["name"]),
-                          arpFlood="yes",
-                          epMoveDetectMode="",
-                          ipLearning="no",
-                          limitIpLearnToSubnets="yes",
-                          name=epgs_bds[keys]["name"],
-                          unicastRoute="yes",
-                          unkMacUcastAct="flood",
-                          unkMcastAct="flood",
-                          fvSubnet1="none",
-                          fvSubnet1_scope="public",
-                          fvRsCtx=epgs_bds[keys]["vrf"]
-                          )
-        print("not found")
-'''
+import_nxos_to_django(epgs_bds)
+convert_vlans_to_epgs()
 
-#print(json.dumps(epgs_bds, sort_keys=True, indent=4))
+

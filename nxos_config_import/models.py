@@ -10,6 +10,7 @@ class Nxos_vlan_svi(models.Model):
     name = models.CharField(default='none', max_length=200)
     svi_ip = models.CharField(default='none', max_length=200)
     vrf = models.CharField(default='none', max_length=200)
+    hostname = models.CharField(default='none', max_length=200)
     last_updated = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -18,14 +19,17 @@ class Nxos_vlan_svi(models.Model):
 class FvAEPg(models.Model):
     apic_addr = models.CharField(max_length=200)
     pcEnfPref = models.CharField(max_length=200)
-    dn = models.CharField(primary_key=True, max_length=200)
-    name = models.CharField(default='none', max_length=200)
+    dn = models.CharField(max_length=200)
+    name = models.CharField(primary_key=True, max_length=200)
     tenant = models.CharField(default='none', max_length=200)
+    encap = models.CharField(default='none', max_length=200)
+    legacy_switch = models.CharField(default='none', max_length=200)
     bd_tDn = models.CharField(max_length=200)
     fvRsDomAtt_tDn = models.CharField(max_length=200)
     fvRsPathAtt = models.CharField(max_length=200)
     fvRsCons = models.CharField(max_length=200)
     fvRsProv = models.CharField(max_length=200)
+    vrf = models.CharField(default='none', max_length=200)
     modTs = models.CharField(max_length=200)
     last_updated = models.DateTimeField(default=timezone.now)
 
@@ -61,3 +65,12 @@ class FvBD(models.Model):
     def __str__(self):
         return self.apic_addr
 
+
+class EpgInputForm(models.Model):
+    apic_addr = models.CharField(primary_key=True, max_length=200)
+    default_tenant = models.CharField(max_length=200)
+    default_ipg_name = models.CharField(max_length=200)
+    physical_domain = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.apic_addr

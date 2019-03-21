@@ -1,0 +1,12 @@
+{% block content %}
+    <h2>Provide Defaults for ACI Tenant Data</h2>
+    <form method="POST" class="post-form">{% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Update</button>
+    </form>
+    <h2>Push Tenant Data to APIC</h2>
+    <form method="POST" class="post-form">{% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Execute</button>
+    </form>
+{% endblock %}
