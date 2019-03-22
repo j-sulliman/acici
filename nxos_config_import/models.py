@@ -67,10 +67,30 @@ class FvBD(models.Model):
 
 
 class EpgInputForm(models.Model):
-    apic_addr = models.CharField(primary_key=True, max_length=200)
-    default_tenant = models.CharField(max_length=200)
-    default_ipg_name = models.CharField(max_length=200)
-    physical_domain = models.CharField(max_length=200)
+    apic_addr = models.GenericIPAddressField(primary_key=True, max_length=200, default='192.168.0.1')
+    default_tenant = models.CharField(max_length=200, default='LEGACY-TENANT-TN')
+    default_ipg_name = models.CharField(max_length=200, default='LEGACY-NEXUS-VPC_IPG')
+    physical_domain = models.CharField(max_length=200, default='LEGACY_PHY')
+    migration_leafs_nodeid = models.CharField(max_length=200, default='101-102')
 
     def __str__(self):
         return self.apic_addr
+
+
+class PushDataApic(models.Model):
+    apic_addr = models.CharField(primary_key=True, max_length=200)
+    password = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.apic_addr
+
+
+class ObjectConfigurationStatus(models.Model):
+    object_name = models.CharField(primary_key=True, max_length=200)
+    object_configuration = models.TextField()
+    post_url = models.URLField(default='none')
+    post_status = models.CharField(max_length=200)
+    post_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.object_name

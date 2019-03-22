@@ -3,9 +3,15 @@ from django_tables2 import RequestConfig
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from .models import Nxos_vlan_svi, FvAEPg, EpgInputForm
-from .tables import vlan_table, epg_table, epg_form_table
-from .forms import EpgForm
+from .models import Nxos_vlan_svi, FvAEPg, EpgInputForm, PushDataApic, ObjectConfigurationStatus
+from .tables import vlan_table, epg_table, epg_form_table, ObjectConfigurationTable
+from .forms import EpgForm, PushDataForm
+from .aci_models.aci_requests import aci_post
+from .aci_models.tenant_policy import fvTenant, fvAp
+
+
+from django.contrib import messages
+
 
 
 
@@ -28,15 +34,23 @@ def epgs_data(request):
     RequestConfig(request).configure(epgtable)
     return render(request, 'nxos_config_import/epgs.html', {'table': epgtable})
 
+
 def epgs_form_data(request):
     epgformtable = epg_form_table(EpgInputForm.objects.all())
     RequestConfig(request).configure(epgformtable)
     return render(request, 'nxos_config_import/epgs_form.html', {'table': epgformtable})
 
 
+def object_config_data(request):
+    objecttable = ObjectConfigurationTable(ObjectConfigurationStatus.objects.all())
+    RequestConfig(request).configure(objecttable)
+    return render(request, 'nxos_config_import/configuration.html', {'table': objecttable})
+
+
 def epg_new(request):
     if request.method == "POST":
         form = EpgForm(request.POST)
+        form2 = PushDataForm(request.POST)
         if form.is_valid():
             for i in EpgInputForm.objects.all():
                 i.delete()
@@ -56,55 +70,73 @@ def epg_new(request):
                                                                                epg.legacy_switch, epg.name),
                         name=epg.name,
                         tenant=i.default_tenant,
-                        bd_tDn='uni/tn-{}/BD-{}-{}'.format(i.default_tenant, epg.encap, epg.name),
-                        fvRsDomAtt_tDn='uni/phys-{}'.format(i.physical_domain),
-                        fvRsPathAtt='topology/pod-1/protpaths-101-102/pathep-[IPG-{}]'.format(i.default_ipg_name)
+                        bd_tDn='{}_BD'.format(epg.name[0:-4]),
+                        fvRsDomAtt_tDn=i.physical_domain,
+                        fvRsPathAtt=i.default_ipg_name
                     )
                     epg.save()
             return HttpResponseRedirect('/nxos_config_import/epgs_form/')
 
+        if form2.is_valid():
+            for i in PushDataApic.objects.all():
+                i.delete()
+            post2 = form2.save(commit=False)
+            #post.name = request.user
+            #post.published_date = timezone.now()
+            post2.save()
+            object_dict = {}
+            object_dict["tenants"] = []
+            object_dict["epgs"] = []
+            for i in PushDataApic.objects.all():
+                for epg in FvAEPg.objects.all():
+                    tenant_data = fvTenant(
+                        name=epg.tenant, descr="Created by NXOS Config Generator",
+                    )
+                    if epg.tenant not in object_dict["tenants"]:
+                        aci_post(apic_url=i.apic_addr,
+                                 apic_user="admin",
+                                 apic_pw=i.password,
+                                 mo_dn="node/mo/uni.json",
+                                 mo="fvTenant",
+                                 mo_data=tenant_data)
+                        object_dict["tenants"].append(epg.tenant)
+                    if epg.name not in object_dict["epgs"]:
+                        epg_data = fvAp(tenant=epg.tenant,
+                                        ap_name='DEFAULT-LEGACY-{}_AP'.format(epg.legacy_switch),
+                                        ap_description='Created by NXOS Config Generator',
+                                        epg_description='Created by NXOS Config Generator',
+                                        epg_name=epg.name,
+                                        isAttrBasedEPg='no',
+                                        pcEnfPref='unenforced',
+                                        prefGrMemb='exclude')
+                        epg_data.fvRsBd(associated_bd=epg.bd_tDn)
+                        epg_data.fvRsDomAtt(phydom=epg.fvRsDomAtt_tDn)
+                        epg_data.fvRsPathAtt(encap=epg.encap, tDn=epg.fvRsPathAtt,
+                                             path_desc='Created by NXOS Config Generator')
+
+                        try:
+                            json_data = aci_post(apic_url=i.apic_addr,
+                                     apic_user="admin",
+                                     apic_pw=i.password,
+                                     mo_dn="node/mo/uni.json",
+                                     mo="fvAp",
+                                     mo_data=epg_data)
+                            #print(type(json_data))
+                            config = ObjectConfigurationStatus(
+                                object_name = epg.name,
+                                post_url = json_data[2],
+                                object_configuration = json_data[0],
+                                post_status = json_data[1])
+                            config.save()
+                        except:
+                            messages.add_message(request, messages.INFO,
+                                'FAILED Posting object: {} - check configuration and connectivity'.format(epg.name))
+
+            return HttpResponseRedirect('/nxos_config_import/configuration/')
+
     else:
         form = EpgForm()
-    return render(request, 'nxos_config_import/home.html', {'form': form})
-'''
-def epg_new(request):
-    form = EpgForm()
-    return render(request, 'nxos_config_import/home.html', {'form': form})
-'''
-'''
-def epg_form(request, pk):
-    epg_instance = get_object_or_404(FvAEPg, pk=pk)
+        form2 = PushDataForm()
+    return render(request, 'nxos_config_import/home.html', {'form': form, 'form2': form2})
 
-    # If this is a POST request then process the Form data
-    if request.method == 'POST':
 
-        # Create a form instance and populate it with data from the request (binding):
-        form = EpgForm(request.POST)
-
-        # Check if the form is valid:
-        if form.is_valid():
-            # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
-            for epg in FvAEPg.objects.all():
-                epg.tenant = form.clean_tenant['tenant']
-                epg.dn = 'uni/tn-{}/ap-DEFAULT-LEGACY-{}_AP/epg-{}'.format(form.clean_tenant['tenant'],
-                                                                           epg.vrf, epg.name)
-                epg.apic_addr = form.clean_apic_addr['apic_addr']
-                epg.fvRsDomAtt_tDn = 'uni/phys-{}',format(form.clean_physical_domain['physical_domain'])
-
-                epg.save()
-
-            # redirect to a new URL:
-            return HttpResponseRedirect(reverse('epgs') )
-
-    # If this is a GET (or any other method) create the default form.
-    else:
-        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
-        form = EpgForm(initial={'renewal_date': proposed_renewal_date})
-
-    context = {
-        'form': form,
-        'book_instance': epg_instance,
-    }
-
-    return render(request, 'nxos_config_import/home.html', context)
-'''

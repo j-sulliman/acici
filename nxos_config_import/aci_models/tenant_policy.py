@@ -145,7 +145,7 @@ class fvAp (object):
             "instrImedcy": instrImedcy,
             "mode": "regular",
             "primaryEncap": "unknown",
-            "tDn": tDn
+            "tDn": 'topology/pod-1/protpaths-101-102/pathep-[{}]'.format(tDn)
           }
         }
         }
@@ -191,4 +191,5 @@ class fvAp (object):
             }
             }
             }
-self.fvAp['children'][0]['fvAEPg']['children'].append(fvRsBd)
+        self.fvAp['children'][0]['fvAEPg']['children'].append(fvRsBd)
+

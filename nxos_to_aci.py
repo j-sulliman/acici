@@ -72,9 +72,9 @@ def convert_vlans_to_epgs():
                                                                                  vlan.name),
             name='{}-{}_EPG'.format(vlan.encap, vlan.name),
             tenant='NXOS-ACI-DEFAULT',
-            bd_tDn ='uni/tn-NXOS-ACI-DEFAULT/BD-{}-{}_BD'.format(vlan.encap, vlan.name),
-            fvRsDomAtt_tDn='uni/phys-LEGACY_PHY',
-            fvRsPathAtt='topology/pod-1/protpaths-101-102/pathep-[IPG-LEGACY-{}_IPG]'.format(vlan.hostname),
+            bd_tDn ='BD-{}-{}_BD'.format(vlan.encap, vlan.name),
+            fvRsDomAtt_tDn='LEGACY_PHY',
+            fvRsPathAtt='IPG-LEGACY-{}_IPG'.format(vlan.hostname),
             encap=vlan.encap,
             legacy_switch=vlan.hostname,
             vrf=vlan.vrf
