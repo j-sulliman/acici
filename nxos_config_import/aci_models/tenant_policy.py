@@ -78,7 +78,7 @@ class fvBD (object):
             }
 
     #@classmethod
-    def fvSubnet(self, subnet, scope, description = ''):
+    def fvSubnet(self, subnet, scope, description=''):
         fvSubnet = {
         'fvSubnet' : {
         'attributes' : {

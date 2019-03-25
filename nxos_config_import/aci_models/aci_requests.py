@@ -1,6 +1,7 @@
 import json
 import requests
 from requests import urllib3
+import time
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def aci_get(mo_dn, apic_url, apic_user, apic_pw):
@@ -43,9 +44,9 @@ def aci_post(mo_dn, mo, mo_data, apic_url, apic_user, apic_pw):
 
     # Convert the class based object into a dictionary and load into JSON format
     post_dict = mo_data.__dict__
-    #print(post_dict)
     json_post = json.dumps(post_dict)
     get_response = requests.post(sensor_url, data=json_post, cookies=cookies, verify=False)
+    time.sleep(0.5)
 
 
     # Check for success or failure of the post

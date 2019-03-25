@@ -1,5 +1,5 @@
 import django_tables2 as tables
-from .models import Nxos_vlan_svi, FvAEPg, EpgInputForm, ObjectConfigurationStatus
+from .models import Nxos_vlan_svi, FvAEPg, EpgInputForm, ObjectConfigurationStatus, FvBD
 
 
 class vlan_table(tables.Table):
@@ -11,6 +11,12 @@ class vlan_table(tables.Table):
 class epg_table(tables.Table):
     class Meta:
         model = FvAEPg
+        template_name = 'django_tables2/semantic.html'
+
+
+class BdTable(tables.Table):
+    class Meta:
+        model = FvBD
         template_name = 'django_tables2/semantic.html'
 
 

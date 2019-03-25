@@ -7,7 +7,7 @@ from .models import Nxos_vlan_svi, FvAEPg, EpgInputForm, PushDataApic, ObjectCon
 from .tables import vlan_table, epg_table, epg_form_table, ObjectConfigurationTable
 from .forms import EpgForm, PushDataForm
 from .aci_models.aci_requests import aci_post
-from .aci_models.tenant_policy import fvTenant, fvAp
+from .aci_models.tenant_policy import fvTenant, fvAp, fvBD
 
 
 from django.contrib import messages
@@ -72,7 +72,9 @@ def epg_new(request):
                         tenant=i.default_tenant,
                         bd_tDn='{}_BD'.format(epg.name[0:-4]),
                         fvRsDomAtt_tDn=i.physical_domain,
-                        fvRsPathAtt=i.default_ipg_name
+                        fvRsPathAtt=i.default_ipg_name,
+                        mode=i.bd_mode,
+                        fvSubnet=epg.fvSubnet
                     )
                     epg.save()
             return HttpResponseRedirect('/nxos_config_import/epgs_form/')
@@ -87,6 +89,7 @@ def epg_new(request):
             object_dict = {}
             object_dict["tenants"] = []
             object_dict["epgs"] = []
+            object_dict["bd"] = []
             for i in PushDataApic.objects.all():
                 for epg in FvAEPg.objects.all():
                     tenant_data = fvTenant(
@@ -94,7 +97,7 @@ def epg_new(request):
                     )
                     if epg.tenant not in object_dict["tenants"]:
                         aci_post(apic_url=i.apic_addr,
-                                 apic_user="admin",
+                                 apic_user=i.user,
                                  apic_pw=i.password,
                                  mo_dn="node/mo/uni.json",
                                  mo="fvTenant",
@@ -114,7 +117,58 @@ def epg_new(request):
                         epg_data.fvRsPathAtt(encap=epg.encap, tDn=epg.fvRsPathAtt,
                                              path_desc='Created by NXOS Config Generator')
 
+                        if epg.mode != 'l3' or epg.fvSubnet == 'DEFAULT':
+                            bd_data = fvBD(name=epg.bd_tDn,
+                                           description='L2 BD Created by NXOS Config Generator',
+                                           tenant=epg.tenant,
+                                           vrf=epg.vrf,
+                                           arpFlood='yes',
+                                           L2Unk_Unicast='flood',
+                                           L3Unk_Mcast='flood',
+                                           mcastAllow='no',
+                                           MultiDest_Flood='bd-flood',
+                                           EP_learn='no',
+                                           EP_Move='',
+                                           Limit_IP_Learn='yes',
+                                           unicast_routing='no'
+                                           )
+
+                        elif epg.mode == 'l3' or epg.mode == 'L3' and epg.fvSubnet != 'DEFAULT':
+                            bd_data = fvBD(name=epg.bd_tDn,
+                                           description='L3 BD Created by NXOS Config Generator',
+                                           tenant=epg.tenant,
+                                           vrf=epg.vrf,
+                                           arpFlood='no',
+                                           L2Unk_Unicast='proxy',
+                                           L3Unk_Mcast='opt-flood',
+                                           mcastAllow='no',
+                                           MultiDest_Flood='encap-flood',
+                                           EP_learn='no',
+                                           EP_Move='',
+                                           Limit_IP_Learn='yes',
+                                           unicast_routing='yes'
+                                           )
+                            bd_data.fvSubnet(subnet=epg.fvSubnet, scope='public',
+                                             description='Created by NXOS Config Generator')
+
+
+
                         try:
+                            json_bd_data = aci_post(apic_url=i.apic_addr,
+                                                    apic_user="admin",
+                                                    apic_pw=i.password,
+                                                    mo_dn="node/mo/uni.json",
+                                                    mo="fvBD",
+                                                    mo_data=bd_data)
+
+
+                            bd_config = ObjectConfigurationStatus(
+                                object_name=epg.bd_tDn,
+                                post_url=json_bd_data[2],
+                                object_configuration=json_bd_data[0],
+                                post_status=json_bd_data[1])
+                            bd_config.save()
+
                             json_data = aci_post(apic_url=i.apic_addr,
                                      apic_user="admin",
                                      apic_pw=i.password,
@@ -122,15 +176,38 @@ def epg_new(request):
                                      mo="fvAp",
                                      mo_data=epg_data)
                             #print(type(json_data))
+
+                            # print(type(json_data))
                             config = ObjectConfigurationStatus(
-                                object_name = epg.name,
-                                post_url = json_data[2],
-                                object_configuration = json_data[0],
-                                post_status = json_data[1])
+                                object_name=epg.name,
+                                post_url=json_data[2],
+                                object_configuration=json_data[0],
+                                post_status=json_data[1])
+                            config.save()
+
+                        except:
+                            messages.add_message(request, messages.INFO,
+                                'FAILED Posting object: {} - check configuration and connectivity'.format(epg.name))
+                        '''
+                        try:
+                            json_data = aci_post(apic_url=i.apic_addr,
+                                     apic_user="admin",
+                                     apic_pw=i.password,
+                                     mo_dn="node/mo/uni.json",
+                                     mo="fvBd",
+                                     mo_data=bd_data)
+                            #print(type(json_data))
+                            config = ObjectConfigurationStatus(
+                                object_name=epg.bd_tDn,
+                                post_url=json_data[2],
+                                object_configuration =json_data[0],
+                                post_status=json_data[1])
                             config.save()
                         except:
                             messages.add_message(request, messages.INFO,
                                 'FAILED Posting object: {} - check configuration and connectivity'.format(epg.name))
+                        '''
+
 
             return HttpResponseRedirect('/nxos_config_import/configuration/')
 

@@ -27,9 +27,10 @@ class FvAEPg(models.Model):
     bd_tDn = models.CharField(max_length=200)
     fvRsDomAtt_tDn = models.CharField(max_length=200)
     fvRsPathAtt = models.CharField(max_length=200)
-    fvRsCons = models.CharField(max_length=200)
-    fvRsProv = models.CharField(max_length=200)
+    vzAny = models.CharField(max_length=3, default='yes')
+    mode = models.CharField(max_length=2, default='l2')
     vrf = models.CharField(default='none', max_length=200)
+    fvSubnet = models.GenericIPAddressField(max_length=200)
     modTs = models.CharField(max_length=200)
     last_updated = models.DateTimeField(default=timezone.now)
 
@@ -49,7 +50,7 @@ class FvBD(models.Model):
     unicastRoute = models.CharField(max_length=200)
     unkMacUcastAct = models.CharField(max_length=200)
     unkMcastAct = models.CharField(max_length=200)
-    fvSubnet1 = models.CharField(max_length=200, default='none')
+    fvSubnet1 = models.CharField(max_length=200)
     fvSubnet1_scope = models.CharField(max_length=200, default='none')
     fvSubnet2 = models.CharField(max_length=200, default='none')
     fvSubnet2_scope = models.CharField(max_length=200, default='none')
@@ -72,6 +73,7 @@ class EpgInputForm(models.Model):
     default_ipg_name = models.CharField(max_length=200, default='LEGACY-NEXUS-VPC_IPG')
     physical_domain = models.CharField(max_length=200, default='LEGACY_PHY')
     migration_leafs_nodeid = models.CharField(max_length=200, default='101-102')
+    bd_mode = models.CharField(max_length=200, default='l2')
 
     def __str__(self):
         return self.apic_addr
@@ -79,6 +81,7 @@ class EpgInputForm(models.Model):
 
 class PushDataApic(models.Model):
     apic_addr = models.CharField(primary_key=True, max_length=200)
+    user = models.CharField(default='admin', max_length=200)
     password = models.CharField(max_length=200)
 
     def __str__(self):

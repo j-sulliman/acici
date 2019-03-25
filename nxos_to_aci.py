@@ -77,9 +77,11 @@ def convert_vlans_to_epgs():
             fvRsPathAtt='IPG-LEGACY-{}_IPG'.format(vlan.hostname),
             encap=vlan.encap,
             legacy_switch=vlan.hostname,
-            vrf=vlan.vrf
+            vrf=vlan.vrf,
+            fvSubnet=vlan.svi_ip
         )
         epg.save()
+
 
 config_file = read_nxos_config_file()
 epgs_bds = create_vlans_from_nxos(config_file)

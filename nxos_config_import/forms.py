@@ -11,12 +11,14 @@ class EpgForm(forms.ModelForm):
                   'default_tenant',
                   'default_ipg_name',
                   'physical_domain',
-                  'migration_leafs_nodeid')
+                  'migration_leafs_nodeid',
+                  'bd_mode')
 
 class PushDataForm(forms.ModelForm):
     class Meta:
         model = PushDataApic
         fields = ('apic_addr',
+                  'user',
                   'password')
 
 
