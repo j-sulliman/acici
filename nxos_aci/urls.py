@@ -16,13 +16,25 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls import url
+from django.conf import settings
+from django.conf.urls.static import static
+
+from nxos_config_import import views
 
 urlpatterns = [
     path('nxos_config_import/', include('nxos_config_import.urls')),
     path('admin/', admin.site.urls),
+    url(r'^$', views.home, name='home'),
+    url(r'^uploads/form/$', views.model_form_upload, name='model_form_upload'),
+    url(r'^admin/', admin.site.urls),
 ]
 
 #Add Django site authentication urls (for login, logout, password management)
+
 urlpatterns += [
     path('accounts/', include('django.contrib.auth.urls')),
+
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

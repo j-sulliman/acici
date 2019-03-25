@@ -1,5 +1,4 @@
 from django.db import models
-import datetime
 from django.utils import timezone
 
 # Create your models here.
@@ -97,3 +96,9 @@ class ObjectConfigurationStatus(models.Model):
 
     def __str__(self):
         return self.object_name
+
+
+class Document(models.Model):
+    description = models.CharField(max_length=255, blank=True)
+    document = models.FileField(upload_to='documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)

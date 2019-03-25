@@ -31,3 +31,5 @@ class ObjectConfigurationTable(tables.Table):
         model = ObjectConfigurationStatus
         template_name = 'django_tables2/semantic.html'
 
+
+

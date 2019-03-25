@@ -1,13 +1,21 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django_tables2 import RequestConfig
 from django.http import HttpResponseRedirect
+from django.views.generic import TemplateView
 from django.urls import reverse
 
 from .models import Nxos_vlan_svi, FvAEPg, EpgInputForm, PushDataApic, ObjectConfigurationStatus
+from.models import Document
 from .tables import vlan_table, epg_table, epg_form_table, ObjectConfigurationTable
-from .forms import EpgForm, PushDataForm
+from .forms import EpgForm, PushDataForm, DocumentForm
 from .aci_models.aci_requests import aci_post
 from .aci_models.tenant_policy import fvTenant, fvAp, fvBD
+
+from .misc_scripts import create_vlans_from_nxos, import_nxos_to_django, read_nxos_config_file, convert_vlans_to_epgs
+
+from .misc_scripts import handle_uploaded_file
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
 
 from django.contrib import messages
@@ -17,6 +25,11 @@ from django.contrib import messages
 
 
 from django.contrib.auth.decorators import login_required
+
+
+def home(request):
+    documents = Document.objects.all()
+    return render(request, 'home.html', {'documents': documents})
 
 
 def index(request):
@@ -47,10 +60,41 @@ def object_config_data(request):
     return render(request, 'nxos_config_import/configuration.html', {'table': objecttable})
 
 
+def simple_upload(request):
+    if request.method == 'POST' and request.FILES['myfile']:
+        myfile = request.FILES['myfile']
+        fs = FileSystemStorage()
+        filename = fs.save(myfile.name, myfile)
+        uploaded_file_url = fs.url(filename)
+        config_file = read_nxos_config_file(fs.path(filename))
+        imported_config = create_vlans_from_nxos(config_file)
+        import_nxos_to_django(imported_config)
+        convert_vlans_to_epgs()
+        return render(request, 'nxos_config_import/simple_upload.html', {
+            'uploaded_file_url': uploaded_file_url
+        })
+    return render(request, 'nxos_config_import/simple_upload.html')
+
+
+def model_form_upload(request):
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = DocumentForm()
+    return render(request, 'nxos_config_import/model_form_upload.html', {
+        'form': form
+    })
+
+
 def epg_new(request):
+    saved = False
     if request.method == "POST":
         form = EpgForm(request.POST)
         form2 = PushDataForm(request.POST)
+
         if form.is_valid():
             for i in EpgInputForm.objects.all():
                 i.delete()
@@ -214,6 +258,7 @@ def epg_new(request):
     else:
         form = EpgForm()
         form2 = PushDataForm()
+
     return render(request, 'nxos_config_import/home.html', {'form': form, 'form2': form2})
 
 
