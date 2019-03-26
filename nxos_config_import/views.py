@@ -6,6 +6,8 @@ from django.urls import reverse
 
 from .models import Nxos_vlan_svi, FvAEPg, EpgInputForm, PushDataApic, ObjectConfigurationStatus
 from.models import Document
+from django.db.models import Count
+
 from .tables import vlan_table, epg_table, epg_form_table, ObjectConfigurationTable
 from .forms import EpgForm, PushDataForm, DocumentForm
 from .aci_models.aci_requests import aci_post
@@ -69,9 +71,9 @@ def simple_upload(request):
         config_file = read_nxos_config_file(fs.path(filename))
         imported_config = create_vlans_from_nxos(config_file)
         import_nxos_to_django(imported_config)
-        convert_vlans_to_epgs()
+        vlan_no = FvAEPg.objects.values('name').annotate(Count('tenant'))
         return render(request, 'nxos_config_import/simple_upload.html', {
-            'uploaded_file_url': uploaded_file_url
+            'uploaded_file_url': uploaded_file_url, "vlan_no": vlan_no
         })
     return render(request, 'nxos_config_import/simple_upload.html')
 
@@ -94,6 +96,8 @@ def epg_new(request):
     if request.method == "POST":
         form = EpgForm(request.POST)
         form2 = PushDataForm(request.POST)
+        ObjectConfigurationStatus.objects.all().delete()
+        PushDataApic.objects.all().delete()
 
         if form.is_valid():
             for i in EpgInputForm.objects.all():
@@ -121,11 +125,9 @@ def epg_new(request):
                         fvSubnet=epg.fvSubnet
                     )
                     epg.save()
-            return HttpResponseRedirect('/nxos_config_import/epgs_form/')
+            return HttpResponseRedirect('/nxos_config_import/epgs/')
 
         if form2.is_valid():
-            for i in PushDataApic.objects.all():
-                i.delete()
             post2 = form2.save(commit=False)
             #post.name = request.user
             #post.published_date = timezone.now()

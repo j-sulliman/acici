@@ -11,7 +11,27 @@
 
   {% if uploaded_file_url %}
     <p>File uploaded at: <a href="{{ uploaded_file_url }}">{{ uploaded_file_url }}</a></p>
-  {% endif %}
+    <p>
+        <a href="{% url 'epg-data' %}">View imported EPGs Table
+    </a>
+    </p>
+    <p>
+    <a href="{% url 'nci-home' %}">Return home to edit default tenant data</a>
+    <p>
 
-  <p><a href="{% url 'home' %}">Return to home</a></p>
+{% endif %}
+
+  <p></p>
+
+
+
+
+
+
+{% for tenant in vlan_no  %}
+                    <li>{{ t}} {{ tenant.name }} imported </li>
+{% endfor %}
+
+
+
 {% endblock %}

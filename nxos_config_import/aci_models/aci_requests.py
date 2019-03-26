@@ -51,7 +51,7 @@ def aci_post(mo_dn, mo, mo_data, apic_url, apic_user, apic_pw):
 
     # Check for success or failure of the post
     if get_response.status_code == 200:
-        print("SUCCESS Posting Object: \'{}\' Name: \'{}\': Recieved response %s from APIC.".format(mo,
+        print("SUCCESS Posting Object: \'{}\' Name: \'{}\': Recieved response {} from APIC.".format(mo,
                                                                                                     post_dict[mo]['attributes']['name'], get_response.status_code))
         #logfile.write("SUCCESS Posting Object: \'%s\' Name: \'%s\': Recieved response %s from APIC.\n"
         #% (mo, post_dict[mo]['attributes']['name'], get_response.status_code))

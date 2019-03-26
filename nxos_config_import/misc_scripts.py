@@ -32,6 +32,12 @@ def create_vlans_from_nxos(file,  cmd_string="vlan "):
             prev_line = line
             temp_line = line.split(" ")
             vlan_id = temp_line[1].strip()
+            if len(vlan_id) == 1:
+                vlan_id = '000' + vlan_id
+            elif len(vlan_id) == 2:
+                vlan_id = '00'+ vlan_id
+            elif len(vlan_id) == 3:
+                vlan_id = '0' + vlan_id
             epgs_bds[vlan_id] = {}
         elif line.startswith("  name") and prev_line.startswith(cmd_string):
             vlan_name_lst = line.split("  name")
@@ -42,6 +48,12 @@ def create_vlans_from_nxos(file,  cmd_string="vlan "):
         elif line.startswith("interface Vlan"):
             subnet_lst = line.split('interface Vlan')
             svi_cleaned = subnet_lst[1].strip()
+            if len(svi_cleaned) == 1:
+                svi_cleaned = '000' + svi_cleaned
+            elif len(svi_cleaned) == 2:
+                svi_cleaned = '00'+ svi_cleaned
+            elif len(svi_cleaned) == 3:
+                svi_cleaned = '0' + svi_cleaned
             prev_line = line
         elif line.startswith("  vrf member") and prev_line.startswith('interface Vlan'):
             vrf_lst = line.split('  vrf member ')
@@ -61,6 +73,7 @@ def create_vlans_from_nxos(file,  cmd_string="vlan "):
 
 
 def import_nxos_to_django(input_dict):
+    Nxos_vlan_svi.objects.all().delete()
     for keys, values in input_dict.items():
         vlan_entry = Nxos_vlan_svi(
             encap=keys,
@@ -73,6 +86,8 @@ def import_nxos_to_django(input_dict):
 
 
 def convert_vlans_to_epgs():
+    FvAEPg.objects.all().delete()
+    vlan_len = len(Nxos_vlan_svi.objects.all())
     for vlan in Nxos_vlan_svi.objects.all():
         print("vlan: {} name: {}".format(vlan.encap, vlan.name))
         epg = FvAEPg(
@@ -91,6 +106,7 @@ def convert_vlans_to_epgs():
             fvSubnet=vlan.svi_ip
         )
         epg.save()
+    return vlan_len
 
 
 #convert_vlans_to_epgs()

@@ -13,9 +13,9 @@ app_name = 'nxos_config_import'
 
 urlpatterns = [
     url(r'^vlans/', vlans_data),
-    url(r'^epgs/', epgs_data),
+    url(r'^epgs/', epgs_data, name='epg-data'),
     url(r'^epgs_form/', epgs_form_data),
-    url(r'^home/', epg_new),
+    url(r'^home/', epg_new, name='nci-home'),
     url(r'^configuration/', object_config_data),
     url(r'^model_form_upload/', model_form_upload),
     url(r'^simple/$', simple_upload, name='simple_upload'),
