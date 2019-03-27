@@ -97,9 +97,7 @@ def epg_new(request):
     saved = False
     if request.method == "POST":
         form = EpgForm(request.POST)
-        form2 = PushDataForm(request.POST)
         ObjectConfigurationStatus.objects.all().delete()
-        PushDataApic.objects.all().delete()
 
         if form.is_valid():
             for i in EpgInputForm.objects.all():
@@ -128,6 +126,7 @@ def epg_new(request):
                     epg.save()
             return HttpResponseRedirect('/nxos_config_import/epgs/')
 
+        '''
         if form2.is_valid():
             post2 = form2.save(commit=False)
             #post.name = request.user
@@ -250,33 +249,148 @@ def epg_new(request):
                         except:
                             messages.add_message(request, messages.INFO,
                                 'FAILED Posting object: {} - check configuration and connectivity'.format(epg.name))
-                        '''
-                        try:
-                            json_data = aci_post(apic_url=i.apic_addr,
-                                     apic_user="admin",
-                                     apic_pw=i.password,
-                                     mo_dn="node/mo/uni.json",
-                                     mo="fvBd",
-                                     mo_data=bd_data)
-                            #print(type(json_data))
-                            config = ObjectConfigurationStatus(
-                                object_name=epg.bd_tDn,
-                                post_url=json_data[2],
-                                object_configuration =json_data[0],
-                                post_status=json_data[1])
-                            config.save()
-                        except:
-                            messages.add_message(request, messages.INFO,
-                                'FAILED Posting object: {} - check configuration and connectivity'.format(epg.name))
-                        '''
+                   
 
-
+        
             return HttpResponseRedirect('/nxos_config_import/configuration/')
 
+        '''
     else:
         form = EpgForm()
         form2 = PushDataForm()
 
-    return render(request, 'nxos_config_import/home.html', {'form': form, 'form2': form2})
+    return render(request, 'nxos_config_import/home.html', {'form': form})
 
+
+@login_required
+def push_configuration(request):
+    saved = False
+    if request.method == "POST":
+        form = PushDataForm(request.POST)
+        PushDataApic.objects.all().delete()
+        if form.is_valid():
+            post = form.save(commit=False)
+            # post.name = request.user
+            # post.published_date = timezone.now()
+            post.save()
+            object_dict = {}
+            object_dict["tenants"] = []
+            object_dict["epgs"] = []
+            object_dict["bd"] = []
+            object_dict["vrfs"] = []
+            for i in PushDataApic.objects.all():
+                for epg in FvAEPg.objects.all():
+                    tenant_data = fvTenant(
+                        name=epg.tenant, descr="Created by NXOS Config Generator",
+                    )
+                    vrf_data = fvCtx(name=epg.vrf,
+                                     descr='Created by NXOS Config Generator',
+                                     tenant=epg.tenant,
+                                     pcEnfDir='ingress',
+                                     pcenfpref='enforced')
+                    if epg.tenant not in object_dict["tenants"]:
+                        aci_post(apic_url=i.apic_addr,
+                                 apic_user=i.user,
+                                 apic_pw=i.password,
+                                 mo_dn="node/mo/uni.json",
+                                 mo="fvTenant",
+                                 mo_data=tenant_data)
+                        object_dict["tenants"].append(epg.tenant)
+
+                    if epg.vrf not in object_dict["vrfs"]:
+                        aci_post(apic_url=i.apic_addr,
+                                 apic_user=i.user,
+                                 apic_pw=i.password,
+                                 mo_dn="node/mo/uni.json",
+                                 mo="fvCtx",
+                                 mo_data=vrf_data)
+                        object_dict["vrfs"].append(epg.vrf)
+                    if epg.name not in object_dict["epgs"]:
+                        epg_data = fvAp(tenant=epg.tenant,
+                                        ap_name='DEFAULT-LEGACY-{}_AP'.format(epg.legacy_switch),
+                                        ap_description='Created by NXOS Config Generator',
+                                        epg_description='Created by NXOS Config Generator',
+                                        epg_name=epg.name,
+                                        isAttrBasedEPg='no',
+                                        pcEnfPref='unenforced',
+                                        prefGrMemb='exclude')
+                        epg_data.fvRsBd(associated_bd=epg.bd_tDn)
+                        epg_data.fvRsDomAtt(phydom=epg.fvRsDomAtt_tDn)
+                        epg_data.fvRsPathAtt(encap=epg.encap, tDn=epg.fvRsPathAtt,
+                                             path_desc='Created by NXOS Config Generator')
+
+                        if epg.mode != 'l3' or epg.fvSubnet == 'DEFAULT':
+                            bd_data = fvBD(name=epg.bd_tDn,
+                                           description='L2 BD Created by NXOS Config Generator',
+                                           tenant=epg.tenant,
+                                           vrf=epg.vrf,
+                                           arpFlood='yes',
+                                           L2Unk_Unicast='flood',
+                                           L3Unk_Mcast='flood',
+                                           mcastAllow='no',
+                                           MultiDest_Flood='bd-flood',
+                                           EP_learn='no',
+                                           EP_Move='',
+                                           Limit_IP_Learn='yes',
+                                           unicast_routing='no'
+                                           )
+
+                        elif epg.mode == 'l3' or epg.mode == 'L3' and epg.fvSubnet != 'DEFAULT':
+                            bd_data = fvBD(name=epg.bd_tDn,
+                                           description='L3 BD Created by NXOS Config Generator',
+                                           tenant=epg.tenant,
+                                           vrf=epg.vrf,
+                                           arpFlood='no',
+                                           L2Unk_Unicast='proxy',
+                                           L3Unk_Mcast='opt-flood',
+                                           mcastAllow='no',
+                                           MultiDest_Flood='encap-flood',
+                                           EP_learn='no',
+                                           EP_Move='',
+                                           Limit_IP_Learn='yes',
+                                           unicast_routing='yes'
+                                           )
+                            bd_data.fvSubnet(subnet=epg.fvSubnet, scope='public',
+                                             description='Created by NXOS Config Generator')
+
+                        try:
+                            json_bd_data = aci_post(apic_url=i.apic_addr,
+                                                    apic_user="admin",
+                                                    apic_pw=i.password,
+                                                    mo_dn="node/mo/uni.json",
+                                                    mo="fvBD",
+                                                    mo_data=bd_data)
+
+                            bd_config = ObjectConfigurationStatus(
+                                object_name=epg.bd_tDn,
+                                post_url=json_bd_data[2],
+                                object_configuration=json_bd_data[0],
+                                post_status=json_bd_data[1])
+                            bd_config.save()
+
+                            json_data = aci_post(apic_url=i.apic_addr,
+                                                 apic_user="admin",
+                                                 apic_pw=i.password,
+                                                 mo_dn="node/mo/uni.json",
+                                                 mo="fvAp",
+                                                 mo_data=epg_data)
+
+                            config = ObjectConfigurationStatus(
+                                object_name=epg.name,
+                                post_url=json_data[2],
+                                object_configuration=json_data[0],
+                                post_status=json_data[1])
+                            config.save()
+
+                        except:
+                            messages.add_message(request, messages.INFO,
+                                                 'FAILED Posting object: {} - check configuration and connectivity'.format(
+                                                     epg.name))
+
+            return HttpResponseRedirect('/nxos_config_import/configuration/')
+
+    else:
+        form = PushDataForm()
+
+    return render(request, 'nxos_config_import/push.html', {'form': form})
 

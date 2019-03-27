@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from .views import vlans_data, epgs_data, epg_new, epgs_form_data, object_config_data, model_form_upload
-from .views import simple_upload
+from .views import simple_upload, push_configuration
 
 from django.conf.urls import include
 from django.urls import path
@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^epgs/', epgs_data, name='epg-data'),
     url(r'^epgs_form/', epgs_form_data),
     url(r'^home/', epg_new, name='nci-home'),
+    url(r'^push/', push_configuration, name='nci-push'),
     url(r'^configuration/', object_config_data),
     url(r'^model_form_upload/', model_form_upload),
     url(r'^simple/$', simple_upload, name='simple_upload'),

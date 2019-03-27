@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', views.home, name='home'),
     url('nxos_config_import/home/', views.home, name='nci-home'),
+    url('nxos_config_import/push/', views.home, name='nci-push'),
     url('nxos_config_import/epgs/', views.epg_table, name='epg-data'),
     url('nxos_config_import/simple/', views.simple_upload, name='nci-upload'),
     url(r'^uploads/form/$', views.model_form_upload, name='model_form_upload'),
