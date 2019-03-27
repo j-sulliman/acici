@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django_tables2 import RequestConfig
 from django.http import HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from django.urls import reverse
 
@@ -11,7 +12,7 @@ from django.db.models import Count
 from .tables import vlan_table, epg_table, epg_form_table, ObjectConfigurationTable
 from .forms import EpgForm, PushDataForm, DocumentForm
 from .aci_models.aci_requests import aci_post
-from .aci_models.tenant_policy import fvTenant, fvAp, fvBD
+from .aci_models.tenant_policy import fvTenant, fvAp, fvBD, fvCtx
 
 from .misc_scripts import create_vlans_from_nxos, import_nxos_to_django, read_nxos_config_file, convert_vlans_to_epgs
 
@@ -28,40 +29,40 @@ from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def home(request):
     documents = Document.objects.all()
     return render(request, 'home.html', {'documents': documents})
 
-
+@login_required
 def index(request):
     return HttpResponse("Hello, world. You're at the nxos config import index.")
 
-
+@login_required
 def vlans_data(request):
     table = vlan_table(Nxos_vlan_svi.objects.all())
     RequestConfig(request).configure(table)
     return render(request, 'nxos_config_import/vlans.html', {'table': table})
 
-
+@login_required
 def epgs_data(request):
     epgtable = epg_table(FvAEPg.objects.all())
     RequestConfig(request).configure(epgtable)
     return render(request, 'nxos_config_import/epgs.html', {'table': epgtable})
 
-
+@login_required
 def epgs_form_data(request):
     epgformtable = epg_form_table(EpgInputForm.objects.all())
     RequestConfig(request).configure(epgformtable)
     return render(request, 'nxos_config_import/epgs_form.html', {'table': epgformtable})
 
-
+@login_required
 def object_config_data(request):
     objecttable = ObjectConfigurationTable(ObjectConfigurationStatus.objects.all())
     RequestConfig(request).configure(objecttable)
     return render(request, 'nxos_config_import/configuration.html', {'table': objecttable})
 
-
+@login_required
 def simple_upload(request):
     if request.method == 'POST' and request.FILES['myfile']:
         myfile = request.FILES['myfile']
@@ -72,12 +73,13 @@ def simple_upload(request):
         imported_config = create_vlans_from_nxos(config_file)
         import_nxos_to_django(imported_config)
         vlan_no = FvAEPg.objects.values('name').annotate(Count('tenant'))
+        vlan_count = len(FvAEPg.objects.all())
         return render(request, 'nxos_config_import/simple_upload.html', {
-            'uploaded_file_url': uploaded_file_url, "vlan_no": vlan_no
+            'uploaded_file_url': uploaded_file_url, "vlan_no": vlan_no, "vlan_count": vlan_count
         })
     return render(request, 'nxos_config_import/simple_upload.html')
 
-
+@login_required
 def model_form_upload(request):
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
@@ -90,7 +92,7 @@ def model_form_upload(request):
         'form': form
     })
 
-
+@login_required
 def epg_new(request):
     saved = False
     if request.method == "POST":
@@ -109,7 +111,6 @@ def epg_new(request):
             for i in EpgInputForm.objects.all():
                 for epg in FvAEPg.objects.all():
                     epg = FvAEPg(
-                        apic_addr=i.apic_addr,
                         encap=epg.encap,
                         legacy_switch=epg.legacy_switch,
                         vrf=epg.vrf,
@@ -136,11 +137,17 @@ def epg_new(request):
             object_dict["tenants"] = []
             object_dict["epgs"] = []
             object_dict["bd"] = []
+            object_dict["vrfs"] = []
             for i in PushDataApic.objects.all():
                 for epg in FvAEPg.objects.all():
                     tenant_data = fvTenant(
                         name=epg.tenant, descr="Created by NXOS Config Generator",
                     )
+                    vrf_data = fvCtx(name=epg.vrf,
+                                     descr='Created by NXOS Config Generator',
+                                     tenant=epg.tenant,
+                                     pcEnfDir='ingress',
+                                     pcenfpref='enforced')
                     if epg.tenant not in object_dict["tenants"]:
                         aci_post(apic_url=i.apic_addr,
                                  apic_user=i.user,
@@ -149,6 +156,15 @@ def epg_new(request):
                                  mo="fvTenant",
                                  mo_data=tenant_data)
                         object_dict["tenants"].append(epg.tenant)
+
+                    if epg.vrf not in object_dict["vrfs"]:
+                        aci_post(apic_url=i.apic_addr,
+                                 apic_user=i.user,
+                                 apic_pw=i.password,
+                                 mo_dn="node/mo/uni.json",
+                                 mo="fvCtx",
+                                 mo_data=vrf_data)
+                        object_dict["vrfs"].append(epg.vrf)
                     if epg.name not in object_dict["epgs"]:
                         epg_data = fvAp(tenant=epg.tenant,
                                         ap_name='DEFAULT-LEGACY-{}_AP'.format(epg.legacy_switch),

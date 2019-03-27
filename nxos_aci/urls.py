@@ -27,8 +27,8 @@ urlpatterns = [
     url(r'^$', views.home, name='home'),
     url('nxos_config_import/home/', views.home, name='nci-home'),
     url('nxos_config_import/epgs/', views.epg_table, name='epg-data'),
+    url('nxos_config_import/simple/', views.simple_upload, name='nci-upload'),
     url(r'^uploads/form/$', views.model_form_upload, name='model_form_upload'),
-    url(r'^admin/', admin.site.urls),
 ]
 
 #Add Django site authentication urls (for login, logout, password management)

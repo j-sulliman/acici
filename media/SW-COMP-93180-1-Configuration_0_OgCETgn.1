@@ -1,0 +1,1373 @@
+﻿
+!Time: Thu Mar 29 09:08:25 2018
+
+version 7.0(3)I7(3)
+hostname SW-COMP-93180-1
+vdc SW-COMP-93180-1 id 1
+  limit-resource vlan minimum 16 maximum 4094
+  limit-resource vrf minimum 2 maximum 4096
+  limit-resource port-channel minimum 0 maximum 511
+  limit-resource u4route-mem minimum 248 maximum 248
+  limit-resource u6route-mem minimum 96 maximum 96
+  limit-resource m4route-mem minimum 58 maximum 58
+  limit-resource m6route-mem minimum 8 maximum 8
+
+feature nxapi
+feature tacacs+
+feature bgp
+feature pim
+feature msdp
+feature eigrp
+feature interface-vlan
+feature hsrp
+feature lacp
+clock timezone NZST 12 0
+clock summer-time NZDT 1 Sunday Apr 02:00 4 Sunday Sep 02:00 60
+
+mac address-table aging-time 14400
+
+username admin password 5 $5$Nz0iRY9W$n4koeHN1pcwVu90Z9kD/LPqhbZhzIWazVNTgpkqypJA  role network-admin
+ip domain-lookup
+ip domain-name asb.co.nz
+tacacs-server key 7 "cisco"
+ip tacacs source-interface mgmt0
+tacacs-server host 10.12.192.99 
+tacacs-server host 10.14.192.99 
+aaa group server tacacs+ ASB_AAA 
+    server 10.14.192.99 
+    server 10.12.192.99 
+ip access-list 8
+  10 permit ip 10.58.1.50/32 any 
+  20 permit ip 10.12.230.163/32 any 
+  30 permit ip 10.12.129.15/32 any 
+  40 permit ip 10.14.230.125/32 any 
+  50 permit ip 10.12.230.68/32 any 
+  60 permit ip 10.94.128.123/32 any 
+  70 permit ip 10.12.66.167/32 any 
+  80 permit ip 10.14.230.21/32 any 
+  90 permit ip 10.12.230.24/32 any 
+  100 permit ip 10.12.230.26/32 any 
+  110 permit ip 202.36.193.0 0.0.0.127 any 
+  120 permit ip 158.98.36.16 0.0.0.15 any 
+ip access-list ACE_ACL
+  10 remark ACL controls access outbound from the ACE
+  20 remark Block Exchange backup traffic routed through the ACE
+  30 deny ip 10.12.78.21/32 10.92.197.0 0.0.0.255 
+  40 deny ip 10.12.78.22/32 10.92.197.0 0.0.0.255 
+  50 deny ip 10.12.78.23/32 10.92.197.0 0.0.0.255 
+  60 deny ip 10.12.78.24/32 10.92.197.0 0.0.0.255 
+  70 deny ip 10.12.78.21/32 10.94.197.0 0.0.0.255 
+  80 deny ip 10.12.78.22/32 10.94.197.0 0.0.0.255 
+  90 deny ip 10.12.78.23/32 10.94.197.0 0.0.0.255 
+  100 deny ip 10.12.78.24/32 10.94.197.0 0.0.0.255 
+  110 deny ip 10.12.2.21/32 10.92.197.0 0.0.0.255 
+  120 deny ip 10.12.2.22/32 10.92.197.0 0.0.0.255 
+  130 deny ip 10.12.2.23/32 10.92.197.0 0.0.0.255 
+  140 deny ip 10.12.2.24/32 10.92.197.0 0.0.0.255 
+  150 deny ip 10.12.2.21/32 10.94.197.0 0.0.0.255 
+  160 deny ip 10.12.2.22/32 10.94.197.0 0.0.0.255 
+  170 deny ip 10.12.2.23/32 10.94.197.0 0.0.0.255 
+  180 deny ip 10.12.2.24/32 10.94.197.0 0.0.0.255 
+  190 remark Permit everything else
+  200 permit ip any any 
+ip access-list Advertise_default_route_only
+  10 permit ip any any 
+  20 deny ip any any 
+ip access-list ECOM-RESTRICT
+  10 deny ip any any log 
+ip access-list ESX-DMZ-VC-FILTER-COMP
+  10 remark ***************************
+  20 remark ** Rules to support HSRP **
+  30 remark ************--*************
+  40 permit udp any 224.0.0.2/32 eq 1985 
+  50 permit udp 224.0.0.2/32 any eq 1985 
+  60 remark *****************************************
+  70 remark ** Rules to allow ASBTO Support Access **
+  80 remark ******************--*********************
+  90 permit ip 10.57.7.43/32 10.12.194.20/32 
+  100 permit ip 10.57.7.44/32 10.12.194.20/32 
+  110 permit ip 10.57.7.46/32 10.12.194.20/32 
+  120 permit ip 10.57.7.49/32 10.12.194.20/32 
+  130 permit ip 10.57.7.58/32 10.12.194.20/32 
+  140 permit ip 10.58.8.41/32 10.12.194.20/32 
+  150 permit ip 10.58.8.42/32 10.12.194.20/32 
+  160 permit ip 10.59.0.208/32 10.12.194.20/32 
+  170 permit ip 10.59.7.47/32 10.12.194.20/32 
+  180 remark ***************
+  190 remark ** Deny Rule **
+  200 remark ******--*******
+  210 deny ip any any 
+ip access-list ESX-DMZ-VCCONTROL-FILTER-COMP
+  10 remark ***************************
+  20 remark ** Rules to support HSRP **
+  30 remark ************--*************
+  40 permit udp any 224.0.0.2/32 eq 1985 
+  50 permit udp 224.0.0.2/32 any eq 1985 
+  60 remark **********************************************
+  70 remark ** Rules to allow VC to control ESX Servers **
+  80 remark ******************--**************************
+  90 permit ip 192.168.31.132/32 10.9.126.20/32 
+  100 permit ip 192.168.31.133/32 10.9.126.20/32 
+  110 permit ip 192.168.31.134/32 10.9.126.20/32 
+  120 permit ip 192.168.31.4/32 10.9.126.20/32 
+  130 permit ip 192.168.31.5/32 10.9.126.20/32 
+  140 permit ip 192.168.31.6/32 10.9.126.20/32 
+  150 remark ***************
+  160 remark ** Deny Rule **
+  170 remark ******--*******
+  180 deny ip any any 
+ip access-list SCAVENGER
+  10 remark Scavenger class apps
+  20 remark Tier 2 Internet Proxy
+  30 permit ip 10.12.68.250/32 any 
+ip access-list WLC_Failover
+  10 remark ACL to be used to control WLC failover only
+  20 remark Deny WLC control traffic to Wifi APs
+  30 deny udp 10.5.101.4/32 range 12222 12223 any 
+  40 deny udp 10.5.101.4/32 range 5246 5247 any 
+  50 deny udp 10.5.101.6/32 range 12222 12223 any 
+  60 deny udp 10.5.101.6/32 range 5246 5247 any 
+  70 remark Permit other traffic for management etc
+  80 permit ip any any 
+ip access-list rtp
+  10 permit udp any range 16384 32768 any range 16384 32768 
+copp profile lenient
+snmp-server location C:Drive/ATCA Computer Room
+snmp-server source-interface traps mgmt0
+snmp-server user admin network-admin auth md5 0x5119fc04b284586eb0d31c12e3ecebeb priv 0x5119fc04b284586eb0d31c12e3ecebeb localizedkey
+snmp-server host 10.12.230.68 traps version 2c TBA
+rmon event 1 description FATAL(1) owner PMON@FATAL
+rmon event 2 description CRITICAL(2) owner PMON@CRITICAL
+rmon event 3 description ERROR(3) owner PMON@ERROR
+rmon event 4 description WARNING(4) owner PMON@WARNING
+rmon event 5 description INFORMATION(5) owner PMON@INFO
+snmp-server enable traps callhome event-notify
+snmp-server enable traps callhome smtp-send-fail
+snmp-server enable traps cfs state-change-notif
+snmp-server enable traps cfs merge-failure
+snmp-server enable traps aaa server-state-change
+snmp-server enable traps hsrp state-change
+snmp-server enable traps feature-control FeatureOpStatusChange
+snmp-server enable traps sysmgr cseFailSwCoreNotifyExtended
+snmp-server enable traps config ccmCLIRunningConfigChanged
+snmp-server enable traps snmp authentication
+snmp-server enable traps link cisco-xcvr-mon-status-chg
+snmp-server enable traps vtp notifs
+snmp-server enable traps vtp vlancreate
+snmp-server enable traps vtp vlandelete
+snmp-server enable traps bridge newroot
+snmp-server enable traps bridge topologychange
+snmp-server enable traps stpx inconsistency
+snmp-server enable traps stpx root-inconsistency
+snmp-server enable traps stpx loop-inconsistency
+snmp-server enable traps system Clock-change-notification
+snmp-server enable traps feature-control ciscoFeatOpStatusChange
+snmp-server enable traps msdp msdpBackwardTransition
+snmp-server enable traps mmode cseNormalModeChangeNotify
+snmp-server enable traps mmode cseMaintModeChangeNotify
+
+
+snmp-server community TBA group network-operator
+snmp-server community TBA use-ipv4acl 8
+ntp server 10.8.250.41 prefer use-vrf default
+ntp server 10.9.250.41 use-vrf default
+tacacs-server directed-request 
+
+ip route 10.0.230.0/24 10.7.0.12 tag 21001
+ip route 10.1.1.128/29 10.5.47.40 tag 21001
+ip route 10.1.64.0/19 10.5.47.220 tag 21001
+ip route 10.1.128.0/23 10.5.47.220 tag 21001
+ip route 10.1.132.0/22 10.5.47.220 tag 21001
+ip route 10.5.3.0/24 10.7.0.12 tag 21001
+ip route 10.5.19.0/24 10.5.47.110 tag 21001
+ip route 10.5.68.0/24 10.5.47.220 tag 21001
+ip route 10.5.83.0/29 10.7.0.24 tag 21001
+ip route 10.7.9.31/32 10.5.47.100 tag 21001
+ip route 10.7.9.32/32 10.5.47.100 tag 21001
+ip route 10.7.9.33/32 10.5.47.100 tag 21001
+ip route 10.7.9.35/32 10.5.47.100 tag 21001
+ip route 10.7.11.13/32 10.5.47.100 tag 21001
+ip route 10.7.200.31/32 10.5.47.100 tag 21001
+ip route 10.7.200.32/32 10.5.47.100 tag 21001
+ip route 10.7.201.36/32 10.5.47.100 tag 21001
+ip route 10.7.201.37/32 10.5.47.100 tag 21001
+ip route 10.7.201.40/32 10.5.47.100 tag 21001
+ip route 10.7.202.31/32 10.5.47.40 tag 21001
+ip route 10.7.202.32/32 10.5.47.100 tag 21001
+ip route 10.8.222.220/30 10.5.47.40 tag 21001
+ip route 10.8.222.224/29 10.5.47.40 tag 21001
+ip route 10.8.222.232/29 10.5.47.40 tag 21001
+ip route 10.8.222.240/29 10.5.47.40 tag 21001
+ip route 10.8.222.248/29 10.5.47.110 tag 21001
+ip route 10.8.250.41/32 10.8.223.5 tag 21001
+ip route 10.9.222.220/30 10.5.47.40 tag 21001
+ip route 10.9.222.224/29 10.5.47.40 tag 21001
+ip route 10.9.222.232/29 10.5.47.40 tag 21001
+ip route 10.10.37.128/29 10.5.47.110 tag 21001
+ip route 10.10.38.0/25 10.5.47.110 tag 21001
+ip route 10.10.40.0/25 10.5.47.110 tag 21001
+ip route 10.10.40.128/25 10.5.47.110 tag 21001
+ip route 10.10.43.0/25 10.5.47.110 tag 21001
+ip route 10.10.44.128/25 10.5.47.110 tag 21001
+ip route 10.10.45.128/25 10.5.47.110 tag 21001
+ip route 10.10.47.0/25 10.5.47.110 tag 21001
+ip route 10.10.47.128/25 10.5.47.110 tag 21001
+ip route 10.10.52.0/25 10.5.47.110 tag 21001
+ip route 10.10.53.0/25 10.5.47.110 tag 21001
+ip route 10.10.53.128/25 10.5.47.110 tag 21001
+ip route 10.10.54.0/25 10.5.47.110 tag 21001
+ip route 10.10.54.128/25 10.5.47.110 tag 21001
+ip route 10.10.55.0/25 10.5.47.110 tag 21001
+ip route 10.10.55.128/25 10.5.47.110 tag 21001
+ip route 10.10.56.0/25 10.5.47.110 tag 21001
+ip route 10.10.58.0/27 10.5.47.110 tag 21001
+ip route 10.11.0.0/24 10.5.47.100 tag 21001
+ip route 10.11.2.0/25 10.5.47.40 tag 21001
+ip route 10.11.2.128/25 10.5.47.40 tag 21001
+ip route 10.12.2.0/24 10.12.255.41 tag 21001
+ip route 10.12.68.0/22 10.12.255.41 tag 21001
+ip route 10.12.72.0/22 10.12.255.51 tag 21001
+ip route 10.12.250.0/26 10.12.255.21 tag 21001
+ip route 10.12.250.64/26 10.12.255.31 tag 21001
+ip route 10.12.250.128/26 10.12.255.41 tag 21001
+ip route 10.12.250.192/26 10.12.255.51 tag 21001
+ip route 10.13.176.0/21 10.5.47.50 tag 21001
+ip route 10.13.192.0/19 10.5.47.50 tag 21001
+ip route 10.13.224.0/19 10.5.47.50 tag 21001
+ip route 10.15.176.0/21 10.5.47.50 tag 21001
+ip route 10.15.192.0/19 10.5.47.50 tag 21001
+ip route 10.15.224.0/19 10.5.47.50 tag 21001
+ip route 10.17.70.157/32 10.5.47.40 tag 21001
+ip route 10.17.70.158/32 10.5.47.40 tag 21001
+ip route 10.17.70.159/32 10.5.47.40 tag 21001
+ip route 10.19.48.0/21 10.5.47.40 tag 21001
+ip route 10.19.60.0/22 10.5.47.40 tag 21001
+ip route 10.19.64.0/20 10.5.47.40 tag 21001
+ip route 10.20.0.0/16 10.7.3.38 tag 21001
+ip route 10.25.96.86/32 10.5.47.100 tag 21001
+ip route 10.25.112.115/32 10.5.47.100 tag 21001
+ip route 10.25.112.151/32 10.5.47.100 tag 21001
+ip route 10.25.121.31/32 10.5.47.100 tag 21001
+ip route 10.26.32.9/32 10.5.47.100 tag 21001
+ip route 10.26.40.29/32 10.5.47.100 tag 21001
+ip route 10.26.40.32/32 10.5.47.100 tag 21001
+ip route 10.26.40.77/32 10.5.47.100 tag 21001
+ip route 10.26.45.7/32 10.5.47.100 tag 21001
+ip route 10.65.144.0/20 10.5.47.220 tag 21001
+ip route 10.92.236.0/23 10.5.47.50 tag 21001
+ip route 10.92.238.0/24 10.5.47.50 tag 21001
+ip route 10.92.239.0/24 10.5.47.50 tag 21001
+ip route 10.93.176.0/21 10.5.47.50 tag 21001
+ip route 10.95.176.0/21 10.5.47.50 tag 21001
+ip route 10.110.100.0/24 10.5.47.50 tag 21001
+ip route 10.130.0.0/16 10.5.47.50 tag 21001
+ip route 10.130.100.2/32 10.7.14.36 tag 21001
+ip route 10.131.0.0/16 10.5.47.50 tag 21001
+ip route 10.132.0.0/18 10.5.47.50 tag 21001
+ip route 10.132.64.0/19 10.5.47.50 tag 21001
+ip route 10.224.0.0/13 10.5.47.50 tag 21001
+ip route 10.241.0.9/32 10.5.47.100 tag 21001
+ip route 10.241.1.0/24 Null0 tag 21001
+ip route 10.241.2.0/24 10.5.47.100 tag 21001
+ip route 10.241.8.254/32 10.5.47.50 tag 21001
+ip route 69.184.0.0/16 10.5.47.100
+ip route 69.191.193.174/32 10.5.47.100 tag 21001
+ip route 69.191.229.119/32 10.5.47.100 tag 21001
+ip route 79.72.21.1/32 79.72.6.1 tag 21001
+ip route 79.72.21.2/32 79.72.6.1 tag 21001
+ip route 122.56.5.193/32 10.5.47.190 tag 21001
+ip route 134.251.51.1/32 10.5.47.100 tag 21001
+ip route 143.96.28.64/27 10.5.47.100 tag 21001
+ip route 143.96.31.32/28 10.5.47.100 tag 21001
+ip route 143.96.46.0/27 10.5.47.100 tag 21001
+ip route 160.43.0.0/16 10.5.47.100 tag 21001
+ip route 165.47.4.42/32 10.5.47.40 tag 21001
+ip route 165.47.4.56/32 10.5.47.40 tag 21001
+ip route 165.47.10.97/32 10.5.47.40 tag 21001
+ip route 165.47.10.120/32 10.5.47.40 tag 21001
+ip route 172.16.3.0/24 10.5.47.20 tag 21001
+ip route 172.16.6.0/23 10.5.47.20 tag 21001
+ip route 172.16.9.0/24 10.5.47.20 tag 21001
+ip route 172.16.16.0/23 10.5.47.50 tag 21001
+ip route 172.16.20.0/24 10.5.47.50 tag 21001
+ip route 172.16.24.0/23 10.5.51.59 tag 21001
+ip route 172.16.32.0/23 10.5.47.50 tag 21001
+ip route 172.16.34.0/23 10.5.47.50 tag 21001
+ip route 172.16.40.0/23 10.5.47.50 tag 21001
+ip route 172.16.146.0/23 10.5.47.220 tag 21001
+ip route 172.16.148.0/22 10.5.47.220 tag 21001
+ip route 172.16.152.0/21 10.5.47.220 tag 21001
+ip route 172.16.160.0/19 10.5.47.220 tag 21001
+ip route 172.19.1.0/24 10.5.47.100 tag 21001
+ip route 172.19.62.3/32 10.5.47.100 tag 21001
+ip route 172.19.62.77/32 10.5.47.100 tag 21001
+ip route 172.19.62.78/32 10.5.47.100 tag 21001
+ip route 172.19.63.197/32 10.5.47.100 tag 21001
+ip route 172.19.63.198/32 10.5.47.100 tag 21001
+ip route 172.19.63.199/32 10.5.47.100 tag 21001
+ip route 172.19.63.228/32 10.5.47.100 tag 21001
+ip route 172.19.63.229/32 10.5.47.100 tag 21001
+ip route 172.19.63.242/32 10.5.47.100 tag 21001
+ip route 172.19.63.243/32 10.5.47.100 tag 21001
+ip route 172.19.63.246/32 10.5.47.100 tag 21001
+ip route 172.19.128.1/32 10.5.47.100 tag 21001
+ip route 172.19.128.9/32 10.5.47.100 tag 21001
+ip route 172.19.252.8/32 10.5.47.100 tag 21001
+ip route 172.19.252.33/32 10.5.47.100 tag 21001
+ip route 172.19.252.81/32 10.5.47.100 tag 21001
+ip route 172.19.252.97/32 10.5.47.100 tag 21001
+ip route 172.19.252.136/32 10.5.47.100 tag 21001
+ip route 172.19.252.200/32 10.5.47.100 tag 21001
+ip route 172.19.254.2/32 10.5.47.100 tag 21001
+ip route 172.19.254.24/32 10.5.47.100 tag 21001
+ip route 172.19.254.40/32 10.5.47.100 tag 21001
+ip route 172.19.254.80/32 10.5.47.100 tag 21001
+ip route 172.19.254.130/32 10.5.47.100 tag 21001
+ip route 172.19.254.144/32 10.5.47.100 tag 21001
+ip route 172.19.254.152/32 10.5.47.100 tag 21001
+ip route 172.19.254.161/32 10.5.47.100 tag 21001
+ip route 172.19.254.177/32 10.5.47.100 tag 21001
+ip route 172.19.254.232/32 10.5.47.100 tag 21001
+ip route 172.19.255.150/32 10.5.47.100 tag 21001
+ip route 172.19.255.193/32 10.5.47.100 tag 21001
+ip route 172.19.255.209/32 10.5.47.100 tag 21001
+ip route 172.22.128.0/23 10.5.47.190 tag 21001
+ip route 172.22.253.80/28 10.5.47.190 tag 21001
+ip route 172.23.0.0/17 10.5.47.50 tag 21001
+ip route 172.23.128.0/19 10.5.47.50 tag 21001
+ip route 192.168.10.0/29 10.5.47.190 tag 21001
+ip route 192.168.14.0/27 10.5.47.220 tag 21001
+ip route 192.168.18.40/29 10.5.47.50 tag 21001
+ip route 192.168.19.2/32 10.5.47.40 tag 21001
+ip route 192.168.19.250/32 10.5.47.40 tag 21001
+ip route 192.168.20.250/32 10.5.47.40 tag 21001
+ip route 192.168.23.0/25 10.5.47.20 tag 21001
+ip route 192.168.24.0/24 10.5.47.20 tag 21001
+ip route 192.168.25.0/24 10.5.47.20 tag 21001
+ip route 192.168.29.0/24 10.5.47.20 tag 21001
+ip route 192.168.31.0/25 10.5.47.20 tag 21001
+ip route 192.168.32.0/22 10.5.47.20 tag 21001
+ip route 192.168.36.0/24 10.5.47.20 tag 21001
+ip route 192.168.38.0/24 10.5.47.20 tag 21001
+ip route 192.168.45.0/24 10.5.47.100 tag 21001
+ip route 192.168.50.0/25 10.5.47.50 tag 21001
+ip route 192.168.52.0/23 10.5.47.20 tag 21001
+ip route 192.168.80.0/25 10.5.47.20 tag 21001
+ip route 192.168.82.0/23 10.5.47.160 tag 21001
+ip route 192.168.84.0/23 10.5.47.220 tag 21001
+ip route 192.168.88.0/22 10.5.47.220 tag 21001
+ip route 192.168.92.0/22 10.5.47.220 tag 21001
+ip route 192.168.100.0/22 10.5.47.220 tag 21001
+ip route 192.168.111.42/32 10.8.16.22 tag 21001
+ip route 192.168.114.0/23 10.5.47.40 tag 21001
+ip route 192.168.117.0/24 10.5.47.40 tag 21001
+ip route 192.168.120.0/21 10.5.47.20 tag 21001
+ip route 192.168.136.0/23 10.5.47.20 tag 21001
+ip route 192.168.140.0/24 10.5.47.20 tag 21001
+ip route 192.168.146.0/24 10.5.47.20 tag 21001
+ip route 192.168.150.0/23 10.5.47.190 tag 21001
+ip route 192.168.165.0/25 10.5.47.40 tag 21001
+ip route 192.168.165.13/32 10.5.47.40 tag 21001
+ip route 192.168.166.0/25 10.5.47.40 tag 21001
+ip route 192.168.166.40/32 10.5.47.40 tag 21001
+ip route 192.168.167.0/28 10.5.47.40 tag 21001
+ip route 192.168.175.32/32 10.5.47.40 tag 21001
+ip route 192.168.175.34/32 10.5.47.40 tag 21001
+ip route 192.168.180.0/22 10.5.47.20 tag 21001
+ip route 192.168.201.4/32 10.5.47.100 tag 21001
+ip route 192.168.211.24/29 10.5.47.100 tag 21001
+ip route 192.168.212.128/26 10.5.47.100 tag 21001
+ip route 192.168.214.128/26 10.5.47.220 tag 21001
+ip route 192.168.218.0/23 10.5.47.40 tag 21001
+ip route 192.168.229.0/24 10.5.47.40 tag 21001
+ip route 192.168.235.128/25 10.5.47.50 tag 21001
+ip route 192.168.236.2/32 10.5.47.40 tag 21001
+ip route 192.168.236.7/32 10.5.47.40 tag 21001
+ip route 192.168.236.245/32 10.5.47.40 tag 21001
+ip route 192.168.236.251/32 10.5.47.40 tag 21001
+ip route 192.168.236.252/32 10.5.47.40 tag 21001
+ip route 192.168.245.0/24 10.5.47.100 tag 21001
+ip route 192.168.250.0/24 10.7.0.15 tag 21001
+ip route 199.105.176.0/21 10.5.47.100 tag 21001
+ip route 199.105.182.0/24 10.5.47.100 tag 21001
+ip route 199.105.184.0/23 10.5.47.100 tag 21001
+ip route 202.49.96.29/32 10.5.47.100 tag 21001
+ip route 202.49.97.13/32 10.5.47.100 tag 21001
+ip route 202.49.97.14/32 10.5.47.100 tag 21001
+ip route 202.49.200.37/32 10.5.47.100 tag 21001
+ip route 202.49.202.37/32 10.5.47.100 tag 21001
+ip route 202.50.0.181/32 10.5.47.100 tag 21001
+ip route 202.50.1.181/32 10.5.47.100 tag 21001
+ip route 202.50.1.182/32 10.5.47.100 tag 21001
+ip route 202.50.5.181/32 10.5.47.100 tag 21001
+ip route 205.183.246.0/24 10.5.47.100 tag 21001
+ip route 208.134.161.0/24 10.5.47.100 tag 21001
+ip pim bsr bsr-candidate loopback101 hash-len 30
+ip pim rp-address 10.8.208.254 group-list 224.0.0.0/4
+ip pim bsr rp-candidate loopback100 group-list 224.0.0.0/4
+ip pim ssm range 232.0.0.0/8
+ip pim bsr forward listen
+ip msdp originator-id loopback101
+ip msdp peer 10.8.208.250 connect-source loopback101
+ip msdp peer 10.8.208.251 connect-source loopback101
+ip msdp peer 10.8.208.252 connect-source loopback101
+vlan 1-2,4,7,16-20,43-44,50,54,62,72-73,223,260-261,263,266,268,301,303-304,335,352,356,358-360,367,369,371,374,381-382,385,387,399,550,552-553,600-601,612,630,634-636,686,934-936
+vlan 2
+  name FES
+vlan 4
+  name router_distrib_lan1
+vlan 7
+  name router_distrib_lan2
+vlan 16
+  name Voice_Gateway_Router_1
+vlan 17
+  name Voice_Gateway_Router_2
+vlan 18
+  name VOICE_GW_172_22_253_192
+vlan 19
+  name SIP_CUBE_10_5_250_192
+vlan 20
+  name FW_inside_interfaces
+vlan 43
+  name Sov_Voice_GW_1
+vlan 44
+  name Sov_Voice_GW_2
+vlan 50
+  name 10.7.0.0_network
+vlan 54
+  name ATCA-CORE-WAAS-VLAN-2
+vlan 62
+  name ATCA-CORE-WAAS-VLAN-1
+vlan 72
+  name SOV_router_distrib_lan1
+vlan 73
+  name SOV_router_distrib_lan2
+vlan 223
+  name network_backup_IF_routers
+vlan 260
+  name COMP-6509-2_COMP-6509-3_CBA
+vlan 261
+  name COMP-6509-2_CBA-RTR
+vlan 263
+  name COMP-6509-2_COMP-N7K-1_CBA
+vlan 266
+  name COMP-6509-2_ATCA-6509-2_CBA_1
+vlan 268
+  name COMP-6509-2_MANSW1_CBA
+vlan 301
+  name COMP-MANSW2_SW-COMP-6509-2_VRFSO
+vlan 303
+  name COMP-6509-2_ATCA-6509-2_1
+vlan 304
+  name COMP-6509-2_ATCA-6509-2_SOV_1
+vlan 335
+  name COMP-MANSW2_SW-COMP-6509-2_ASB
+vlan 352
+  name COMP-N7010-1_COMP-6509-2_L3
+vlan 356
+  name COMP-N7010-1_COMP-6509-2_L3_SOV
+vlan 358
+  name COMP-6509-2_COMP-6509-3
+vlan 359
+  name COMP-6509-2_COMP-6509-3_SOV
+vlan 360
+  name SOV_FW
+vlan 367
+  name COMP-6509-2_ATCA-6509-2_2
+vlan 369
+  name COMP-6509-2_ATCA-6509-2_SOV_2
+vlan 371
+  name COMP6509-2_COMP3750_VRFSOV
+vlan 374
+  name COMP6509-2_COMP3750
+vlan 381
+  name SW-COMP-6509-2_RO-COMP-ASR-1_L3
+vlan 382
+  name SW-COMP-6509-2_RO-COMP-ASR-1_SOV
+vlan 385
+  name SW-COMP-6509-2_SPARK-BR-ASR_L3
+vlan 387
+  name SW-COMP-6509-2_SPARK-BR-ASR_SOV
+vlan 399
+  name COMP_CORE_MGMT
+vlan 550
+  name BSN_VLAN_10_10_38_0/25
+vlan 552
+  name BSN_VLAN_AD_10_10_37_128
+vlan 553
+  name BSN_ROUTER_TO_ASA
+vlan 600
+  name ACE_Outside_VLAN
+vlan 601
+  name ACE_FT_VLAN
+vlan 612
+  name HWLB_Common_Apps_Exch_10_14_2
+vlan 630
+  name VSE_Production_10_12_64
+vlan 634
+  name HWLB_PROD_10_12_68
+vlan 635
+  name HWLB_ECOM-PROD_10_12_72
+vlan 636
+  name HWLB_PROD_SIEM_10_12_76
+vlan 686
+  name Man_Plat_10_12_230
+vlan 934
+  name NX_HWLB_PROD_10_92_68
+vlan 935
+  name NX_HWLB_ECOM-PROD_10_92_72
+vlan 936
+  name NX_HWLB_PROD_SPARE_10_92_76
+
+spanning-tree pathcost method long
+spanning-tree vlan 1,4,9,11,16-20,32-33,39-40,43,45,47-48,53,62,66,72,151,223,360,399-402,411-418,434-450,550,553,600-601,612,634-636 priority 8192
+spanning-tree vlan 3,7,26,29,44,54,65,67,71,73,80,150,552,934-936 priority 16384
+ip prefix-list ALLOWED-ASB-VRF-ROUTES-TO-CBA seq 10 deny 10.11.4.0/24 le 32 
+ip prefix-list ALLOWED-ASB-VRF-ROUTES-TO-CBA seq 20 deny 10.117.128.0/22 
+ip prefix-list ALLOWED-ASB-VRF-ROUTES-TO-CBA seq 30 deny 10.39.128.0/18 
+ip prefix-list ALLOWED-ASB-VRF-ROUTES-TO-CBA seq 40 deny 10.39.192.0/18 
+ip prefix-list ALLOWED-ASB-VRF-ROUTES-TO-CBA seq 65535 permit 0.0.0.0/0 le 32 
+ip prefix-list ALLOWED-CBA-ROUTES-TO-ASB-VRF seq 10 permit 10.11.4.0/24 le 32 
+ip prefix-list ALLOWED-CBA-ROUTES-TO-ASB-VRF seq 20 permit 10.117.128.0/22 
+ip prefix-list ALLOWED-CBA-ROUTES-TO-ASB-VRF seq 30 permit 10.39.128.0/18 
+ip prefix-list ALLOWED-CBA-ROUTES-TO-ASB-VRF seq 40 permit 10.39.192.0/18 
+ip prefix-list ALLOWED-CBA-ROUTES-TO-ASB-VRF seq 65535 deny 0.0.0.0/0 le 32 
+ip prefix-list ALLOW_ASB_TO_CBA seq 10 permit 10.241.1.0/24 
+ip prefix-list ALLOW_ASB_TO_CBA seq 20 permit 69.184.0.0/16 
+ip prefix-list ALLOW_ASB_TO_CBA seq 30 permit 160.46.0.0/16 
+ip prefix-list ALLOW_ASB_TO_CBA seq 40 permit 199.105.176.0/21 
+ip prefix-list ALLOW_ASB_TO_CBA seq 50 permit 199.105.182.0/24 
+ip prefix-list ALLOW_ASB_TO_CBA seq 60 permit 199.105.184.0/23 
+ip prefix-list ALLOW_ASB_TO_CBA seq 70 permit 205.186.246.0/24 
+ip prefix-list ALLOW_ASB_TO_CBA seq 80 permit 208.134.161.0/24 
+ip prefix-list ALLOW_ASB_TO_CBA seq 65000 deny 0.0.0.0/0 le 32 
+ip prefix-list ALLOW_CBA_TO_ASB seq 10 permit 10.241.4.0/22 
+ip prefix-list ALLOW_CBA_TO_ASB seq 20 permit 10.241.8.0/22 
+ip prefix-list ALLOW_CBA_TO_ASB seq 30 permit 10.241.12.0/22 
+ip prefix-list ALLOW_CBA_TO_ASB seq 40 permit 10.241.16.0/22 
+ip prefix-list ALLOW_CBA_TO_ASB seq 50 permit 10.241.144.0/21 
+ip prefix-list ALLOW_CBA_TO_ASB seq 65000 deny 0.0.0.0/0 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 10 permit 10.8.222.120/30 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 20 permit 10.8.222.124/30 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 30 permit 10.0.0.0/16 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 40 permit 10.1.32.0/22 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 50 permit 10.65.15.0/24 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 60 permit 10.6.0.0/16 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 70 permit 172.20.0.0/15 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 80 permit 10.16.0.0/16 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 90 permit 10.32.0.0/16 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 100 permit 10.48.0.0/16 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 110 permit 10.80.0.0/16 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 120 permit 10.96.0.0/16 le 32 
+ip prefix-list ASB_BRANCH_ROUTES_ONLY seq 65535 deny 0.0.0.0/0 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 10 permit 10.8.222.128/30 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 20 permit 10.8.222.132/30 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 30 permit 10.130.8.0/21 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 40 permit 10.131.60.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 50 permit 10.131.64.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 60 permit 10.131.68.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 70 permit 10.131.80.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 80 permit 10.131.84.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 90 permit 172.23.60.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 100 permit 172.23.64.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 110 permit 172.23.68.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 120 permit 172.23.76.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 130 permit 172.23.80.0/22 le 32 
+ip prefix-list SOV_BRANCH_ROUTES_ONLY seq 65535 deny 0.0.0.0/0 le 32 
+ip prefix-list allow-cba-to-cba-vrf seq 10 permit 10.241.1.0/24 
+ip prefix-list allow-cba-to-cba-vrf seq 20 permit 69.184.0.0/16 
+ip prefix-list allow-cba-to-cba-vrf seq 30 permit 160.46.0.0/16 
+ip prefix-list allow-cba-to-cba-vrf seq 40 permit 199.105.176.0/21 
+ip prefix-list allow-cba-to-cba-vrf seq 50 permit 199.105.182.0/24 
+ip prefix-list allow-cba-to-cba-vrf seq 60 permit 199.105.184.0/23 
+ip prefix-list allow-cba-to-cba-vrf seq 70 permit 205.186.246.0/24 
+ip prefix-list allow-cba-to-cba-vrf seq 80 permit 208.134.161.0/24 
+ip prefix-list allow-cba-to-cba-vrf seq 90 permit 0.0.0.0/0 
+ip prefix-list allow-cba-to-cba-vrf seq 65000 deny 0.0.0.0/0 le 32 
+ip prefix-list allow-cba-vrf-to-cba seq 10 permit 10.241.4.0/22 
+ip prefix-list allow-cba-vrf-to-cba seq 20 permit 10.241.8.0/22 
+ip prefix-list allow-cba-vrf-to-cba seq 30 permit 10.241.12.0/22 
+ip prefix-list allow-cba-vrf-to-cba seq 40 permit 10.241.16.0/22 
+ip prefix-list allow-cba-vrf-to-cba seq 50 permit 10.241.144.0/21 
+ip prefix-list allow-cba-vrf-to-cba seq 65000 deny 0.0.0.0/0 le 32 
+route-map LOCAL_PREF_ASB permit 10
+  set local-preference 400
+route-map LOCAL_PREF_CBA permit 10
+  set local-preference 400
+route-map SET_AS_PATH_ASB_TO_CBA permit 10
+  match ip address prefix-list ALLOW_ASB_TO_CBA 
+route-map SET_AS_PATH_CBA_VRF_TO_CBA permit 10
+  match ip address prefix-list allow-cba-vrf-to-cba ALLOW_CBA_VRF_TO_CBA 
+route-map STATIC-TO-EIGRP_ASB permit 10
+  match tag 21001 
+route-map cba_bgp_to_asb_eigrp permit 10
+  match ip address prefix-list allow-cba-to-asb ALLOW_CBA_TO_ASB 
+route-map cba_bgp_to_eigrp permit 10
+  match ip address prefix-list allow-cba-to-cba-vrf ALLOW_CBA_TO_CBA_VRF 
+vrf context CBA
+  ip route 10.241.4.0/22 Null0
+  ip route 10.241.8.0/22 Null0
+  ip route 10.241.12.0/22 Null0
+  ip route 10.241.16.0/22 Null0
+  ip route 10.241.144.0/21 Null0
+vrf context SOV
+  ip route 0.0.0.0/0 10.8.222.44
+  ip route 0.0.0.0/1 10.8.222.44
+  ip route 10.9.96.0/24 10.8.222.44
+  ip route 10.130.0.1/32 10.130.90.6
+  ip route 128.0.0.0/1 10.8.222.44
+  ip route 172.16.16.0/23 10.8.222.44
+  ip route 172.16.20.0/24 10.8.222.44
+  ip route 172.16.32.0/23 10.8.222.44
+  ip route 172.16.34.0/23 10.8.222.44
+  ip route 172.16.40.0/23 10.8.222.44
+  ip route 192.168.50.0/25 10.8.222.44
+  ip pim ssm range 232.0.0.0/8
+vrf context management
+  ip route 0.0.0.0/0 10.92.236.1
+vlan configuration 20
+  no ip igmp snooping
+
+
+interface Vlan1
+
+interface Vlan4
+  description Airedale core router Vlan
+  no shutdown
+  delay 10
+  ip address 10.8.254.9/29
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan7
+  description Airedale core router Vlan 2
+  no shutdown
+  delay 10
+  ip address 10.8.252.1/24
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan16
+  description Voice Gateway Router 1
+  no shutdown
+  delay 10
+  ip address 10.5.252.2/24
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan17
+  description Voice Gateway Router 2
+  no shutdown
+  delay 10
+  ip address 10.5.251.2/24
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan18
+  description Voice Gateways using Active/Standby Interfaces
+  no shutdown
+  delay 10
+  ip address 172.22.253.194/27
+  ip pim sparse-mode
+  hsrp 1 
+    preempt 
+    priority 150
+    timers  1  3
+    ip 172.22.253.193
+
+interface Vlan19
+  description SIP CUBE Outside VLAN
+  no shutdown
+  delay 10
+  no ip redirects
+  ip address 10.5.250.194/27
+  ip router eigrp 2
+  ip pim sparse-mode
+  hsrp 1 
+    preempt 
+    priority 150
+    timers  1  3
+    ip 10.5.250.193
+
+interface Vlan20
+  description Airedale Vlan for inside interfaces of Firewalls
+  no shutdown
+  delay 10
+  no ip redirects
+  ip address 10.5.47.2/24
+  ip router eigrp 2
+  hsrp 20 
+    preempt 
+    priority 110
+    timers  1  3
+    ip 10.5.47.1
+
+interface Vlan43
+  description Sovereign Voice Gateway subnet 1
+  no shutdown
+  vrf member SOV
+  ip address 10.130.241.2/24
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+
+interface Vlan44
+  description Sovereign Voice Gateway subnet 2
+  no shutdown
+  vrf member SOV
+  ip address 10.130.242.2/24
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+
+interface Vlan72
+  description Sovereign distribution 'routed' subnet 1
+  no shutdown
+  vrf member SOV
+  ip address 10.131.2.49/29
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan73
+  description Sovereign distribution 'routed' subnet 2
+  no shutdown
+  vrf member SOV
+  ip address 10.131.2.57/29
+  ip router eigrp 2
+  ip pim sparse-mode
+
+interface Vlan223
+  description network backup IF router vlan
+  no shutdown
+  delay 10
+  ip address 10.8.223.2/24
+  ip router eigrp 2
+  ip pim sparse-mode
+  hsrp 1 
+    preempt 
+    priority 150
+    timers  1  3
+    ip 10.8.223.1
+
+interface Vlan260
+  description CBA COMP-6509-2 to COMP-6509-3
+  no shutdown
+  vrf member CBA
+  ip address 10.241.8.17/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+
+interface Vlan261
+  description CBA COMP-6509-2 to COMP Telstra Router
+  no shutdown
+  vrf member CBA
+  ip address 10.241.8.6/29
+  ip router eigrp 2
+
+interface Vlan263
+  description CBA COMP-6509-2 to COMP-N7K-1
+  no shutdown
+  vrf member CBA
+  ip address 10.241.8.21/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+
+interface Vlan266
+  description CBA COMP-6509-2 to ATCA-6509-2
+  no shutdown
+  vrf member CBA
+  ip address 10.241.8.33/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+
+interface Vlan268
+  description CBA COMP-6509-2 to COMP-MANSW2
+  no shutdown
+  vrf member CBA
+  ip address 10.241.8.41/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+
+interface Vlan301
+  description To COMP-MANSW1 NOCMON
+  no shutdown
+  vrf member SOV
+  ip address 10.8.220.134/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+
+interface Vlan303
+  description SW-COMP-6509-2 to SW-ATCA-6509-2 over DWDM NOCMON
+  no shutdown
+  mtu 9216
+  bandwidth 10000000
+  ip address 10.240.1.1/24
+  ip router eigrp 2
+  ip hold-time eigrp 2 3
+  ip hello-interval eigrp 2 1
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan304
+  description SW-COMP-6509-2 to SW-ATCA-6509-2 SOV VRF over DWDM NOCMON
+  no shutdown
+  mtu 9216
+  bandwidth 10000000
+  vrf member SOV
+  ip address 10.130.0.5/30
+  ip router eigrp 2
+  ip hold-time eigrp 155 3
+  ip hello-interval eigrp 155 1
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan335
+  description ASB TO COMP-MANSW2 NOCMON
+  no shutdown
+  bandwidth 10000000
+  ip address 10.8.220.86/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan352
+  description Routed SVI to COMP-N7010-1
+  no shutdown
+  mtu 9216
+  bandwidth 10000000
+  no ip redirects
+  ip address 10.8.222.2/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan356
+  description Routed SVI to COMP-N7010-1 VRF SOV
+  no shutdown
+  mtu 9216
+  bandwidth 10000000
+  vrf member SOV
+  ip address 10.8.222.26/30
+  ip router eigrp 2
+
+interface Vlan358
+  description Routed SVI to COMP-6509-3
+  no shutdown
+  mtu 9216
+  bandwidth 10000000
+  ip address 10.8.222.33/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan359
+  description Routed SVI to COMP-6509-3 VRF SOV
+  no shutdown
+  mtu 9216
+  bandwidth 10000000
+  vrf member SOV
+  ip address 10.8.222.37/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan360
+  description Sovereign Core to ASA FW
+  no shutdown
+  vrf member SOV
+  no ip redirects
+  ip address 10.8.222.42/29
+  ip directed-broadcast
+  ip router eigrp 2
+  hsrp 1 
+    preempt 
+    priority 120
+    timers  1  3
+    ip 10.8.222.41
+
+interface Vlan367
+  description SW-COMP-6509-2 to SW-ATCA-6509-2 Path 2 over DWDM NOCMON
+  no shutdown
+  mtu 9216
+  bandwidth 10000000
+  ip address 10.8.222.93/30
+  ip router eigrp 2
+  ip hold-time eigrp 2 3
+  ip hello-interval eigrp 2 1
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan369
+  description SW-COMP-6509-2 to SW-ATCA-6509-2 SOV VRF Path 2 over DWDM NOCMON
+  no shutdown
+  mtu 9216
+  bandwidth 10000000
+  vrf member SOV
+  ip address 10.8.222.109/30
+  ip router eigrp 2
+  ip hold-time eigrp 155 3
+  ip hello-interval eigrp 155 1
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan371
+  description Routed SVI to SW-COMP-3750 VRF SOV
+  no shutdown
+  vrf member SOV
+  ip address 10.8.222.61/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+
+interface Vlan374
+  description Routed SVI to SW-COMP-3750
+  no shutdown
+  ip address 10.8.222.69/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan381
+  description Connection to RO-COMP-ASR-1
+  no shutdown
+  ip address 10.8.222.102/30
+  ip router eigrp 2
+  no ip passive-interface eigrp 2
+
+interface Vlan382
+  description Connection to RO-COMP-ASR-1
+  no shutdown
+  vrf member SOV
+  ip address 10.130.222.10/30
+  ip router eigrp 2
+
+interface Vlan385
+  description Connection to Spark-Branch-ASR ASB VRF
+  no shutdown
+  ip address 10.8.222.122/30
+  ip router eigrp 2
+  ip distribute-list eigrp 2 prefix-list ASB_BRANCH_ROUTES_ONLY in
+  no ip passive-interface eigrp 2
+  ip pim sparse-mode
+
+interface Vlan387
+  description Connection to Spark-Branch-ASR SOV VRF
+  no shutdown
+  vrf member SOV
+  ip address 10.8.222.130/30
+  ip router eigrp 2
+  ip distribute-list eigrp 2 prefix-list SOV_BRANCH_ROUTES_ONLY in
+  no ip passive-interface eigrp 2
+
+interface Vlan399
+  description Core Management Access
+  no shutdown
+  no ip redirects
+  ip address 10.8.16.2/24
+  ip router eigrp 2
+  hsrp 1 
+    preempt 
+    priority 150
+    timers  1  3
+    ip 10.8.16.1
+
+interface Vlan600
+  description ACE Outside VLAN (10.12.255.0 subnet)
+  no shutdown
+  no ip redirects
+  ip address 10.12.255.2/24
+  ip router eigrp 2
+  hsrp 1 
+    preempt 
+    priority 150
+    timers  1  3
+    ip 10.12.255.1
+
+interface port-channel62
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 2-3,10,15,22-25,27-28,30-31,34-35,37-38,41-42,46,50-51,90,120,550,552,602-604,610-712,724-727,760-762,797-798,800-810,824-827,849-850,854,910-999
+  mtu 9216
+
+interface port-channel70
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 1-100,120-121,150-151,260,300-4094
+  mtu 9216
+
+interface Ethernet1/1
+  description connected to NTCOMP1387
+  switchport
+  switchport access vlan 20
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no snmp trap link-status
+  no shutdown
+
+interface Ethernet1/2
+  description W2COMP143 - CHECK POINT MANAGEMENT
+  switchport
+  switchport access vlan 20
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no shutdown
+
+interface Ethernet1/3
+  description CP-WIFI-COMP-01  eth1-02
+  switchport
+  switchport access vlan 20
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no snmp trap link-status
+  no shutdown
+
+interface Ethernet1/4
+  description ASA-COMP-BSN BSN Firewall Inside Interface
+  switchport
+  switchport access vlan 20
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no shutdown
+
+interface Ethernet1/5
+  description Connected to NTCOMP1006 - Eth 5- Internal
+  switchport
+  switchport access vlan 20
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no snmp trap link-status
+  no shutdown
+
+interface Ethernet1/6
+  description Connected to ASA-COMP-REALTIME01
+  switchport
+  switchport access vlan 20
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no snmp trap link-status
+  no shutdown
+
+interface Ethernet1/7
+  description Connected to W2COMP157 - Eth 2 - Internal
+  switchport
+  switchport access vlan 20
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no snmp trap link-status
+  no shutdown
+
+interface Ethernet1/8
+  description Resource FW ASB interface, Eth2-01
+  switchport
+  switchport access vlan 20
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no snmp trap link-status
+  no shutdown
+
+interface Ethernet1/9
+  description Resource FW Sovereign interface, Eth2-02
+  switchport
+  switchport access vlan 360
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no snmp trap link-status
+  no shutdown
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+
+interface Ethernet1/12
+
+interface Ethernet1/13
+
+interface Ethernet1/14
+
+interface Ethernet1/15
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+  description CBA fbrobe USCOMP2896 SPAN
+  switchport
+  switchport monitor
+  no shutdown
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+  description Connected to SW-COMP-3750 Gi1/0/12
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 371,374,550
+  no shutdown
+
+interface Ethernet1/26
+  description Connected to SW-COMP-4948-MGMT-1
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 399
+  no shutdown
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+  description Etherchannel 70 to SW-COMP-93180-2
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 1-100,120-121,150-151,260,300-4094
+  mtu 9216
+  logging event port link-status
+  channel-group 70 mode active
+  no shutdown
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+  description Port-Channel 62 to SW-COMP-N7010-1 Eth1/37 NOCMON
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 2-3,10,15,22-25,27-28,30-31,34-35,37-38,41-42,46,50-51,90,120,550,552,602-604,610-712,724-727,760-762,797-798,800-810,824-827,849-850,854,910-999
+  mtu 9216
+  logging event port trunk-status
+  channel-group 62 mode active
+
+interface Ethernet1/34
+  description Port-Channel 62 to SW-COMP-N7010-2 Eth1/37 NOCMON
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 2-3,10,15,22-25,27-28,30-31,34-35,37-38,41-42,46,50-51,90,120,550,552,602-604,610-712,724-727,760-762,797-798,800-810,824-827,849-850,854,910-999
+  mtu 9216
+  logging event port trunk-status
+  channel-group 62 mode active
+
+interface Ethernet1/35
+  description L3 to SW-COMP-N7010-1 eth2/38 NOCMON
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 263,352,356
+  mtu 9216
+  logging event port trunk-status
+  no shutdown
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+  description CBA KYC Router LAN
+  switchport
+  switchport access vlan 261
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no shutdown
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+  description Routed uplink to Spark Business Partner ASR  asbcompd-b4 gig 0/2
+  no cdp enable
+  ip address 10.11.4.33/30
+  ip router eigrp 2
+  ip distribute-list eigrp 2 prefix-list ALLOWED-ASB-VRF-ROUTES-TO-CBA out
+  ip distribute-list eigrp 2 prefix-list ALLOWED-CBA-ROUTES-TO-ASB-VRF in
+  no ip passive-interface eigrp 2
+  no shutdown
+
+interface Ethernet1/44
+  description RO-COMP-NTP-4431-1, gig 0/0/0
+  switchport
+  switchport access vlan 223
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+  no shutdown
+
+interface Ethernet1/45
+  description Uplink to RO-COMP-1004-ASR-1 Te1/0/0 NOCMON
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 381-382,385
+  no shutdown
+
+interface Ethernet1/46
+  description TO COMP-MANSW2 NOCMON
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 268,301,335
+  mtu 9216
+  logging event port link-status
+  no shutdown
+
+interface Ethernet1/47
+  description Uplink DWDM1 To SW-ATCA-93180-1 NOCMON
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 303-304
+  mtu 9216
+  logging event port link-status
+  no shutdown
+
+interface Ethernet1/48
+  description Uplink DWDM2 To SW-ATCA-6509-2 NOCMON
+  switchport
+  switchport mode trunk
+  switchport trunk allowed vlan 266,367,369
+  mtu 9216
+  logging event port link-status
+  no shutdown
+
+interface Ethernet1/49
+
+interface Ethernet1/50
+
+interface Ethernet1/51
+
+interface Ethernet1/52
+
+interface Ethernet1/53
+
+interface Ethernet1/54
+
+interface mgmt0
+  vrf member management
+  ip address 10.92.236.110/24
+
+interface loopback0
+  description Switch Management
+  ip address 10.8.250.2/32
+  ip router eigrp 2
+  ip pim sparse-mode
+
+interface loopback10
+  description CBA iBGP Peer address
+  vrf member CBA
+  ip address 10.241.8.252/32
+  ip router eigrp 2
+
+interface loopback100
+  description ANYCAST RP ADDRESS SAME ON EVERY CORE 6509
+  ip address 10.8.208.254/32
+  ip router eigrp 2
+  ip pim sparse-mode
+
+interface loopback101
+  description ANYCAST RP MSDP PEERING ADDRESS
+  ip address 10.8.208.253/32
+  ip router eigrp 2
+  ip pim sparse-mode
+line console
+line vty
+boot nxos bootflash:/nxos.7.0.3.I7.3.bin 
+router eigrp 2
+  passive-interface default
+  default-metric 100000 10 255 1 1500
+  address-family ipv4 unicast
+    redistribute static route-map STATIC-TO-EIGRP_ASB
+    redistribute bgp 65010 route-map cba_bgp_to_asb_eigrp
+  vrf CBA
+    address-family ipv4 unicast
+      autonomous-system 103
+      redistribute bgp 65010 route-map cba_bgp_to_eigrp
+  vrf SOV
+    address-family ipv4 unicast
+      autonomous-system 155
+      no eigrp log-neighbor-changes
+      redistribute static route-map STATIC-TO-EIGRP_SOV
+router bgp 65010
+  address-family ipv4 unicast
+    network 10.241.1.0/24
+    network 69.184.0.0/16
+    network 160.46.0.0/24
+    network 199.105.176.0/21
+    network 199.105.182.0/24
+    network 199.105.184.0/23
+    network 205.183.246.0/24
+    network 208.134.161.0/24
+  template peer INTERNAL_ASB
+    remote-as 65010
+    password 3 77840f9d4d882176
+    update-source loopback0
+    address-family ipv4 unicast
+  template peer INTERNAL_CBA
+    remote-as 65010
+    password 3 5b6f5a3b0301f5ff
+    update-source loopback10
+    address-family ipv4 unicast
+  neighbor 10.8.250.3
+    inherit peer INTERNAL_ASB
+  neighbor 10.9.250.2
+    inherit peer INTERNAL_ASB
+  neighbor 10.9.250.3
+    inherit peer INTERNAL_ASB
+  neighbor 10.241.8.254
+    remote-as 64552
+    local-as 64617 no-prepend replace-as
+    description CBA Peering through Resource Firewall
+    update-source loopback0
+    ebgp-multihop 10
+    address-family ipv4 unicast
+      prefix-list ALLOW_CBA_TO_ASB in
+      prefix-list ALLOW_ASB_TO_CBA out
+      route-map LOCAL_PREF_ASB in
+      route-map SET_AS_PATH_ASB_TO_CBA out
+      next-hop-self
+  vrf CBA
+    address-family ipv4 unicast
+      network 10.241.4.0/22
+      network 10.241.8.0/22
+      network 10.241.12.0/22
+      network 10.241.16.0/22
+      network 10.241.144.0/21
+    neighbor 10.241.8.1
+      remote-as 64552
+      local-as 64616 no-prepend replace-as
+      password 3 289d2510e791779d282693a6133572f5
+      update-source Vlan261
+      address-family ipv4 unicast
+        prefix-list allow-cba-to-cba-vrf in
+        prefix-list allow-cba-vrf-to-cba out
+        route-map LOCAL_PREF_CBA in
+        route-map SET_AS_PATH_CBA_VRF_TO_CBA out
+        next-hop-self
+    neighbor 10.241.8.253
+      inherit peer INTERNAL_CBA
+      shutdown
+    neighbor 10.241.9.252
+      inherit peer INTERNAL_CBA
+      no shutdown
+    neighbor 10.241.9.253
+      inherit peer INTERNAL_CBA
+      shutdown
+monitor session 1 
+  source interface Ethernet1/1 both
+  destination interface Ethernet1/17
+
+
+SW-COMP-93180-1# exit

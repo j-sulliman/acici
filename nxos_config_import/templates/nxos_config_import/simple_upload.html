@@ -3,34 +3,42 @@
 {% load static %}
 
 {% block content %}
+<section xmlns="http://www.w3.org/1999/html">
+<div class="container">
+  <div class="d-flex justify-content-center">
+    <div class="p-2">
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="file" name="myfile">
     <button type="submit">Upload</button>
   </form>
+</div>
+    <div class="p-2">
+      Instructions:
+      Some instructions
+    </div>
+</div>
+</div>
+</section>
 
-  {% if uploaded_file_url %}
-    <p>File uploaded at: <a href="{{ uploaded_file_url }}">{{ uploaded_file_url }}</a></p>
-    <p>
-        <a href="{% url 'epg-data' %}">View imported EPGs Table
-    </a>
-    </p>
-    <p>
-    <a href="{% url 'nci-home' %}">Return home to edit default tenant data</a>
-    <p>
+{% if uploaded_file_url %}
+<div>
+
+  <div class="container">
+  <div class="d-flex justify-content-center">
+  <div class="p-2">
+    <button type="button" class="btn btn-lg btn-outline-secondary">
+  VLANs imported: <span class="badge badge-white">{{ vlan_count }}</span>
+  </button>
+  </div>
+  </div>
+</div>
+
+
+
 
 {% endif %}
 
-  <p></p>
-
-
-
-
-
-
-{% for tenant in vlan_no  %}
-                    <li>{{ t}} {{ tenant.name }} imported </li>
-{% endfor %}
 
 
 

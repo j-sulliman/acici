@@ -25,7 +25,7 @@ SECRET_KEY = '60l!o9ifa^&r-wbv1b##e%*ggn)83cg(8g)868gwf1(i@2*9l^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['210.54.88.3', '127.0.0.1', '192.168.2.181']
 
 
 # Application definition
@@ -124,3 +124,4 @@ STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+LOGIN_REDIRECT_URL = '/'

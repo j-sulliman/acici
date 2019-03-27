@@ -16,7 +16,6 @@ class Nxos_vlan_svi(models.Model):
         return self.name
 
 class FvAEPg(models.Model):
-    apic_addr = models.CharField(max_length=200)
     pcEnfPref = models.CharField(max_length=200)
     dn = models.CharField(max_length=200)
     name = models.CharField(primary_key=True, max_length=200)
@@ -38,7 +37,6 @@ class FvAEPg(models.Model):
 
 
 class FvBD(models.Model):
-    apic_addr = models.CharField(max_length=200)
     descr = models.CharField(max_length=200)
     dn = models.CharField(primary_key=True, max_length=200)
     arpFlood = models.CharField(max_length=200)
@@ -67,7 +65,8 @@ class FvBD(models.Model):
 
 
 class EpgInputForm(models.Model):
-    apic_addr = models.GenericIPAddressField(primary_key=True, max_length=200, default='192.168.0.1')
+    apic_addr = models.GenericIPAddressField(primary_key=True, max_length=200,
+                                             default='sandboxapicdc.cisco.com')
     default_tenant = models.CharField(max_length=200, default='LEGACY-TENANT-TN')
     default_ipg_name = models.CharField(max_length=200, default='LEGACY-NEXUS-VPC_IPG')
     physical_domain = models.CharField(max_length=200, default='LEGACY_PHY')
@@ -79,9 +78,9 @@ class EpgInputForm(models.Model):
 
 
 class PushDataApic(models.Model):
-    apic_addr = models.CharField(primary_key=True, max_length=200)
+    apic_addr = models.CharField(primary_key=True, max_length=200, default='sandboxapicdc.cisco.com')
     user = models.CharField(default='admin', max_length=200)
-    password = models.CharField(max_length=200)
+    password = models.CharField(default='ciscopsdt', max_length=200)
 
     def __str__(self):
         return self.apic_addr

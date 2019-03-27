@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 class EpgForm(forms.ModelForm):
     class Meta:
         model = EpgInputForm
-        fields = ('apic_addr',
+        fields = (
                   'default_tenant',
                   'default_ipg_name',
                   'physical_domain',
