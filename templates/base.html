@@ -11,24 +11,24 @@
     <title>ACI Configuration Importer</title>
   </head>
   <body class="p-3 mb-2 bg-white text-dark">
-    <div class="p-3 mb-2 bg-white text-white">
       <div class="row justify-content-center" >
         <div class="col-10 p-3 mb-2 bg-light text-dark">
-          <h1>ACI Config Import</h1>
-          <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-              <li class="breadcrumb-item"><a href="{% url 'nci-upload' %}">Upload Config File</a></li>
-              <li class="breadcrumb-item"><a href="{% url 'nci-home' %}">Change ACI Defaults</a></li>
-              <li class="breadcrumb-item"><a href="{% url 'epg-data' %}">View Imported EPGs</a></li>
-              <li class="breadcrumb-item"><a href="{% url 'nci-push' %}">Push Configuration</a></li>
-              <li class="breadcrumb-item active" aria-current="page">Data</li>
-            </ol>
-          </nav>
+          <h1>ACI Config Import</h1
+            <div class="dropdown">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Menu
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="{% url 'nci-upload' %}">Upload Config File</a>
+    <a class="dropdown-item" href="{% url 'nci-home' %}">Change ACI Defaults</a>
+    <a class="dropdown-item" href="{% url 'epg-data' %}">View Imported EPGs</a>
+    <a class="dropdown-item" href="{% url 'nci-push' %}">Push Configuration</a>
+  </div>
+</div>
     {% block content %}
     {% endblock %}
         </div>
       </div>
-    </div>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -37,5 +37,3 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   </body>
 </html>
-
-
