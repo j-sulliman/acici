@@ -70,8 +70,10 @@ def simple_upload(request):
         filename = fs.save(myfile.name, myfile)
         uploaded_file_url = fs.url(filename)
         config_file = read_nxos_config_file(fs.path(filename))
+        #print(config_file)
         imported_config = create_vlans_from_nxos(config_file)
         import_nxos_to_django(imported_config)
+        convert_vlans_to_epgs()
         vlan_no = FvAEPg.objects.values('name').annotate(Count('tenant'))
         vlan_count = len(FvAEPg.objects.all())
         return render(request, 'nxos_config_import/simple_upload.html', {
@@ -249,9 +251,9 @@ def epg_new(request):
                         except:
                             messages.add_message(request, messages.INFO,
                                 'FAILED Posting object: {} - check configuration and connectivity'.format(epg.name))
-                   
 
-        
+
+
             return HttpResponseRedirect('/nxos_config_import/configuration/')
 
         '''
@@ -393,4 +395,3 @@ def push_configuration(request):
         form = PushDataForm()
 
     return render(request, 'nxos_config_import/push.html', {'form': form})
-

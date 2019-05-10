@@ -33,7 +33,7 @@ class FvAEPg(models.Model):
     last_updated = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return self.apic_addr
+        return self.dn
 
 
 class FvBD(models.Model):
@@ -61,7 +61,7 @@ class FvBD(models.Model):
     last_updated = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return self.apic_addr
+        return self.dn
 
 
 class EpgInputForm(models.Model):

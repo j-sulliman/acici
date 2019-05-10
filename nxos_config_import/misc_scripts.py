@@ -1,5 +1,6 @@
 from .models import FvAEPg, Nxos_vlan_svi
 import os
+import pprint as pp
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'nxos_aci.settings'
 
@@ -63,18 +64,44 @@ def create_vlans_from_nxos(file,  cmd_string="vlan "):
             if line.startswith("  ip address") and prev_line.startswith('interface Vlan') and epgs_bds[svi_cleaned]["vrf"] == vrf_lst[1].strip():
                 ip_lst = line.split('  ip address ')
                 epgs_bds[svi_cleaned]['ip'] = ip_lst[1].strip()
+                if epgs_bds[svi_cleaned]['ip'] ==  "10.8.223.2":
+                    print(epgs_bds[svi_cleaned]['ip'])
+                prev_line = line
+                #print(prev_line)
+            if line.startswith("    ip ") and prev_line.startswith('  ip address ') and epgs_bds[svi_cleaned]["vrf"] == vrf_lst[1].strip():
+                ip_lst_tmp = line.split('    ip ')
+                #print(ip_lst_tmp)
+                epgs_bds[svi_cleaned]['ip'] = ip_lst_tmp[1].strip()
         except:
+
             if line.startswith("  ip address") and prev_line.startswith('interface Vlan'):
                 ip_lst = line.split('  ip address ')
+                prev_line = line
+                #print(prev_line)
+                ip = ip_lst[1].strip()
+            if line.startswith("  hsrp ") and prev_line.startswith('  ip address '):
+                prev_line=line
+                print(prev_line)
+            if line.startswith("    ip ") and prev_line.startswith('  hsrp '):
+                print(line)
+                #prev_line_list = prev_line.split('/')
+                ip_lst_tmp = line.split('    ip ')
+                #print(ip_lst_tmp)
+                ip = ip_lst_tmp[1].strip() + prev_line[-4:]
             if svi_cleaned in epgs_bds.keys():
+                #print('it is {}'.format(ip_lst))
+                #print(prev_line[-4:])
                 epgs_bds[svi_cleaned]["vrf"] = "DEFAULT"
-                epgs_bds[svi_cleaned]["ip"] = ip_lst[1].strip()
+                epgs_bds[svi_cleaned]["ip"] = ip
+                #print("ip is {}".format(epgs_bds[svi_cleaned]["ip"]))
+        #pp.pprint(epgs_bds)
     return epgs_bds
 
 
 def import_nxos_to_django(input_dict):
     Nxos_vlan_svi.objects.all().delete()
     for keys, values in input_dict.items():
+        #pp.pprint("{} {}".format(keys, values))
         vlan_entry = Nxos_vlan_svi(
             encap=keys,
             name=values.get("name").upper(),
@@ -88,10 +115,10 @@ def import_nxos_to_django(input_dict):
 def convert_vlans_to_epgs():
     FvAEPg.objects.all().delete()
     vlan_len = len(Nxos_vlan_svi.objects.all())
+    #print(vlan_len)
     for vlan in Nxos_vlan_svi.objects.all():
-        print("vlan: {} name: {}".format(vlan.encap, vlan.name))
+        #print("vlan: {} name: {}".format(vlan.encap, vlan.name))
         epg = FvAEPg(
-            apic_addr='192.168.0.1',
             pcEnfPref='unenforced',
             dn='uni/tn-NXOS-ACI-DEFAULT/ap-{}-LEGACY-{}_AP/epg-{}-{}_EPG'.format(vlan.vrf, vlan.hostname, vlan.encap,
                                                                                  vlan.name),
@@ -110,4 +137,3 @@ def convert_vlans_to_epgs():
 
 
 #convert_vlans_to_epgs()
-
