@@ -106,7 +106,7 @@ class fvBD (object):
 
 class fvAp (object):
     def __init__(self, tenant, ap_name, ap_description, epg_description, epg_name,
-       isAttrBasedEPg = 'no', pcEnfPref ='unenforced', prefGrMemb = 'exclude'):
+       isAttrBasedEPg = 'no', pcEnfPref ='unenforced', prefGrMemb = 'include'):
         self.fvAp = {
             "attributes": {
               "descr": ap_description,
@@ -192,4 +192,3 @@ class fvAp (object):
             }
             }
         self.fvAp['children'][0]['fvAEPg']['children'].append(fvRsBd)
-

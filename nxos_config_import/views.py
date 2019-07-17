@@ -307,15 +307,17 @@ def push_configuration(request):
                                  mo="fvCtx",
                                  mo_data=vrf_data)
                         object_dict["vrfs"].append(epg.vrf)
+
                     if epg.name not in object_dict["epgs"]:
                         epg_data = fvAp(tenant=epg.tenant,
-                                        ap_name='DEFAULT-LEGACY-{}_AP'.format(epg.legacy_switch),
+                                        ap_name='{}-LEGACY-{}_AP'.format(epg.vrf,
+                                        epg.legacy_switch),
                                         ap_description='Created by NXOS Config Generator',
                                         epg_description='Created by NXOS Config Generator',
                                         epg_name=epg.name,
                                         isAttrBasedEPg='no',
                                         pcEnfPref='unenforced',
-                                        prefGrMemb='exclude')
+                                        prefGrMemb='include')
                         epg_data.fvRsBd(associated_bd=epg.bd_tDn)
                         epg_data.fvRsDomAtt(phydom=epg.fvRsDomAtt_tDn)
                         epg_data.fvRsPathAtt(encap=epg.encap, tDn=epg.fvRsPathAtt,
