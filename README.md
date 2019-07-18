@@ -1,4 +1,4 @@
-# nxos_to_aci - automate the ACI configuration of low complexity high volume configuration items in legacy network
+# nxos_to_aci - automate ACI configuration of low complexity, high volume configuration items in legacy network
 Imports L2 constructs (VLANs, SVIs and associated VRF) from Legacy NXOS configuration, 
 Imports into Django models DB
 Bul clean of data (e.g EPG/BD naming convention) 
