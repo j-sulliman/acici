@@ -12,7 +12,7 @@ $ source venv/bin/activate
 
 $ git init
 
-$ git pull https://github.com/j-sulliman/nxos_to_aci.git
+$ git pull https://github.com/j-sulliman/acici.git
 
 Install the required dependencies:
 
