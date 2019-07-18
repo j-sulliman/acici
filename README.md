@@ -8,6 +8,7 @@ Post imported objects to APIC (EPGS are be default included in a preferred group
 
 
 # Setup
+'''
 $ python3 -m venv venv
 
 $ source venv/bin/activate
@@ -19,8 +20,10 @@ $ git pull https://github.com/j-sulliman/acici.git
 Install the required dependencies:
 
 $ pip3 install -r requirements.txt
+'''
 
 # Start Django Server
+'''
 $ python3 manage.py runserver 0:8080
 
 Watching for file changes with StatReloader
@@ -31,6 +34,7 @@ July 18, 2019 - 13:17:42
 Django version 2.2.2, using settings 'nxos_aci.settings'
 Starting development server at http://0:8080/
 Quit the server with CONTROL-C.
+'''
 
 # Logon and Import NXOS file
 i.e. http://127.0.0.1:8080
