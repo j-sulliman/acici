@@ -7,15 +7,20 @@ Post imported objects to APIC (EPGS are be default included in a preferred group
 
 # Setup
 $ python3 -m venv venv
+
 $ source venv/bin/activate
+
 $ git init
+
 $ git pull https://github.com/j-sulliman/nxos_to_aci.git
 
 Install the required dependencies:
+
 $ pip3 install -r requirements.txt
 
 # Start Django Server
 $ python3 manage.py runserver 0:8080
+
 Watching for file changes with StatReloader
 Performing system checks...
 
