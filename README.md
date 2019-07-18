@@ -38,6 +38,7 @@ Provide the defaults for configuration naming convention and BD construct.  BD m
 
 View and Edit the Imported configuration
 ![alt text](https://github.com/j-sulliman/nxos_to_aci/blob/master/Screen%20Shot%202019-07-18%20at%201.51.46%20PM.png)
+ - Object configuration and DN/URL can be used with other REST API clients - i.e. postman, curl, or paste directly into APIC
 
 Enter the APIC connection info and submit
 ![alt text](https://github.com/j-sulliman/nxos_to_aci/blob/master/Screen%20Shot%202019-07-18%20at%201.52.47%20PM.png)
