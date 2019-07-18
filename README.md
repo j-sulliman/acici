@@ -1,11 +1,9 @@
-# nxos_to_aci - automate ACI configuration of low complexity, high volume configuration items in legacy network
+# nxos_to_aci: automate ACI configuration of low complexity, high volume configuration items in legacy network
 Imports L2 constructs (VLANs, SVIs and associated VRF) from Legacy NXOS configuration, 
 Imports into Django models DB
 Bul clean of data (e.g EPG/BD naming convention) 
 Option editing of imported data  
 Post imported objects to APIC (EPGS are be default included in a preferred group)
-
-# Create associated fabric access policies and L3Os
 
 # Setup
 $ python3 -m venv venv
@@ -51,3 +49,9 @@ View the resulting JSON and HTTP Post status code
 
 Check the APIC
 ![alt text](https://github.com/j-sulliman/nxos_to_aci/blob/master/Screen%20Shot%202019-07-18%20at%201.57.24%20PM.png)
+
+# Create associated fabric access policies and L3Os manually
+Rational - items like Physical domain, vlan pools to legacy network will likely only be configured once.  
+Fabric access policies therefore less onerous than tenant policy.
+
+L3Os configuration very environment dependant.
