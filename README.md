@@ -30,3 +30,4 @@ i.e. http://127.0.0.1:8080
 Login as admin/C1sc0123
 
 Menu --> Upload Config File
+Screen Shot 2019-07-18 at 1.23.58 PM.png
