@@ -30,4 +30,4 @@ i.e. http://127.0.0.1:8080
 Login as admin/C1sc0123
 
 Menu --> Upload Config File
-Screen Shot 2019-07-18 at 1.23.58 PM.png
+![alt text](https://github.com/j-sulliman/nxos_to_aci/blob/master/Screen%20Shot%202019-07-18%20at%201.23.58%20PM.png)
