@@ -1,4 +1,4 @@
-# acici: Automate ACI configuration of low complexity, high volume configuration items in legacy network
+# acici: Automate ACI configuration Legacy Logical Network
 Imports L2 constructs (VLANs, SVIs and associated VRF) from Legacy NXOS configuration, 
 Imports into Django models DB
 Bulk clean/naming of data (e.g EPG/BD/VRFs naming convention) 
