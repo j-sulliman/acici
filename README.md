@@ -57,9 +57,9 @@ Check the APIC
 
 # Create associated fabric access policies and L3Os manually
 Rationale - items like Physical domain, vlan pools to legacy network will likely only be configured once.  
-Fabric access policies therefore less onerous than tenant policy.
+Fabric access policies therefore less far less time consuming than tenant policy.
 
-L3Os configuration is environment dependant.
+L3O configuration is environment dependant.
 
 # Disclaimer
 Tested against NXOS 7.X configuration files, may work with IOS but needs testing.
