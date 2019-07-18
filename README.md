@@ -2,7 +2,7 @@
 Imports L2 constructs (VLANs, SVIs and associated VRF) from Legacy NXOS configuration, 
 Imports into Django models DB
 Bulk clean/naming of data (e.g EPG/BD/VRFs naming convention) 
-Optional editing of imported data through Django front end (i.e. http 127.0.0.1:  
+Optional editing and review of imported data through Django admin front end (i.e. http 127.0.0.1:8080/admin)  
 Post imported objects to APIC (EPGS are be default included in a preferred group)
 
 # Setup
