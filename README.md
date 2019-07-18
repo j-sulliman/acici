@@ -55,3 +55,7 @@ Rational - items like Physical domain, vlan pools to legacy network will likely 
 Fabric access policies therefore less onerous than tenant policy.
 
 L3Os configuration very environment dependant.
+
+# Note
+Tested against NXOS 7.X configuration files, may work with IOS but needs testing.
+Use at your own risk - recommend dry-run against a simulator or non-prod APIC
