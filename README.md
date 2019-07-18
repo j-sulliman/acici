@@ -52,11 +52,11 @@ Check the APIC
 ![alt text](https://github.com/j-sulliman/nxos_to_aci/blob/master/Screen%20Shot%202019-07-18%20at%201.57.24%20PM.png)
 
 # Create associated fabric access policies and L3Os manually
-Rational - items like Physical domain, vlan pools to legacy network will likely only be configured once.  
+Rationale - items like Physical domain, vlan pools to legacy network will likely only be configured once.  
 Fabric access policies therefore less onerous than tenant policy.
 
-L3Os configuration very environment dependant.
+L3Os configuration is environment dependant.
 
-# Note
+# Disclaimer
 Tested against NXOS 7.X configuration files, may work with IOS but needs testing.
 Use at your own risk - recommend dry-run against a simulator or non-prod APIC
