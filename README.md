@@ -4,6 +4,8 @@ Imports into Django models DB
 Bulk clean/naming of data (e.g EPG/BD/VRFs naming convention) 
 Optional editing and review of imported data through Django admin front end (i.e. http 127.0.0.1:8080/admin)  
 Post imported objects to APIC (EPGS are be default included in a preferred group)
+![alt text](https://github.com/j-sulliman/acici/blob/master/Screen%20Shot%202019-07-19%20at%2010.38.25%20AM.png)
+
 
 # Setup
 $ python3 -m venv venv
