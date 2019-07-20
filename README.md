@@ -1,5 +1,5 @@
 # ACICI: Automate ACI configuration of Legacy Logical Network
-Imports L2 constructs (VLANs, SVIs and associated VRF) from Legacy NXOS configuration, into ACI in a network centric approach (legacy vlan = ACI BD/EPG). Script is VRF aware, EPGS/BDs will be grouped unde Application Groups, split by VRF.  If there are no VRFs in legacy, all EPGs/BDS will be assigned the "DEFAULT" vrf.   Legacy items are imported into Django models DB
+Imports L2 constructs (VLANs, SVIs and associated VRF) from Legacy NXOS configuration, into ACI in a network centric approach (legacy vlan = ACI BD/EPG). Script is VRF aware, EPGS/BDs will be grouped under Application Endpoint Groups, split by VRF.  If there are no VRFs in legacy, all EPGs/BDS will be assigned the "DEFAULT" vrf.   Legacy items are imported into Django models DB
 Bulk clean/naming of data (e.g EPG/BD/VRFs naming convention) 
 
 Optional editing and review of imported data through Django admin front end (i.e. http 127.0.0.1:8080/admin)  
