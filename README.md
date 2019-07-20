@@ -1,5 +1,5 @@
 # ACICI: Automate ACI configuration of Legacy Logical Network
-Imports L2 constructs (VLANs, SVIs and associated VRF) from Legacy NXOS configuration, Imports into Django models DB
+Imports L2 constructs (VLANs, SVIs and associated VRF) from Legacy NXOS configuration, into ACI in a network centric approach (legacy vlan = ACI BD/EPG). Script is VRF aware, EPGS/BDs will be grouped unde Application Groups, split by VRF.  If there are no VRFs in legacy, all EPGs/BDS will be assigned the "DEFAULT" vrf.   Legacy items are imported into Django models DB
 Bulk clean/naming of data (e.g EPG/BD/VRFs naming convention) 
 
 Optional editing and review of imported data through Django admin front end (i.e. http 127.0.0.1:8080/admin)  
@@ -44,7 +44,7 @@ Login as admin/C1sc0123
 Menu --> Upload Config File
 ![alt text](https://github.com/j-sulliman/nxos_to_aci/blob/master/Screen%20Shot%202019-07-18%20at%201.23.58%20PM.png)
 
-Provide the defaults for configuration naming convention and BD construct.  BD mode in most cases should be l2 which will enable ARP and BUM flooding.  L3 mode will enable unicast routing and configure the SVI address as a BD Subnet.
+Provide the defaults for configuration naming convention and BD construct.  BD mode in most cases should be l2 which will enable ARP and BUM flooding.  L3 mode will enable unicast routing and configure the SVI address as a BD Subnet.  EPGs will be created as "Preferred group - Include" members.
 ![alt text](https://github.com/j-sulliman/nxos_to_aci/blob/master/Screen%20Shot%202019-07-18%20at%201.26.01%20PM.png)
 
 
