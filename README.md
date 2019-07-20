@@ -53,7 +53,7 @@ View and Edit the Imported configuration
  
 Enter the APIC connection info and submit
 ![alt text](https://github.com/j-sulliman/nxos_to_aci/blob/master/Screen%20Shot%202019-07-18%20at%201.52.47%20PM.png)
-Note - progress bar doesn't work.  Haven't figured this out yet.  For now just check the terminal Django was launched from for progress
+
 
 View the resulting JSON and HTTP Post status code
 ![alt text](https://github.com/j-sulliman/nxos_to_aci/blob/master/Screen%20Shot%202019-07-18%20at%201.56.15%20PM.png)
