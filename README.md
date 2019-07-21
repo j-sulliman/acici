@@ -1,3 +1,5 @@
+[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/j-sulliman/acici)
+
 # ACICI: Automate ACI configuration of Legacy Logical Network
 Imports L2 constructs (VLANs, SVIs and associated VRF) from Legacy NXOS configuration, into ACI in a network centric approach (legacy vlan = ACI BD/EPG). 
 
